@@ -1,0 +1,218 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Web.Mvc;
+using Group19_iFINANCEAPP.Models;
+
+namespace Group19_iFINANCEAPP.Controllers
+{
+    public class TransactionHeadersController : Controller
+    {
+        private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
+
+        // GET: TransactionHeaders
+        public ActionResult Index()
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["UserRole"].ToString() == "Admin")
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+
+            string userID = Session["UserID"].ToString();
+            string userRole = Session["UserRole"].ToString();
+
+            var transactionHeader = db.TransactionHeader.Include(t => t.NonAdminUser);
+
+            if (userRole != "Admin")
+            {
+                transactionHeader = transactionHeader.Where(t => t.NonAdminUserID == userID);
+            }
+
+            return View(transactionHeader.ToList());
+        }
+
+        // GET: TransactionHeaders/Details/5
+        public ActionResult Details(string id)
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["UserRole"].ToString() == "Admin")
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
+            if (transactionHeader == null) return HttpNotFound();
+
+            if (Session["UserRole"].ToString() != "Admin" &&
+                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+            return View(transactionHeader);
+        }
+
+        // GET: TransactionHeaders/Create
+        public ActionResult Create()
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["UserRole"].ToString() == "Admin")
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+
+            // Hide dropdown for non-admins
+            if (Session["UserRole"].ToString() == "Admin")
+                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name");
+
+            return View();
+        }
+
+        // POST: TransactionHeaders/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create([Bind(Include = "ID,Date,Description,NonAdminUserID")] TransactionHeader transactionHeader)
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+           
+
+
+            string userRole = Session["UserRole"].ToString();
+            string userID = Session["UserID"].ToString();
+
+            if (ModelState.IsValid)
+            {
+                // If not admin, force user's own ID
+                if (userRole != "Admin")
+                {
+                    transactionHeader.NonAdminUserID = userID;
+                }
+
+                db.TransactionHeader.Add(transactionHeader);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            if (userRole == "Admin")
+                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
+
+            return View(transactionHeader);
+        }
+
+        // GET: TransactionHeaders/Edit/5
+        public ActionResult Edit(string id)
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["UserRole"].ToString() == "Admin")
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
+            if (transactionHeader == null) return HttpNotFound();
+
+            if (Session["UserRole"].ToString() != "Admin" &&
+                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+            if (Session["UserRole"].ToString() == "Admin")
+                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
+
+            return View(transactionHeader);
+        }
+
+        // POST: TransactionHeaders/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "ID,Date,Description,NonAdminUserID")] TransactionHeader transactionHeader)
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+
+            string userRole = Session["UserRole"].ToString();
+            string userID = Session["UserID"].ToString();
+
+            if (ModelState.IsValid)
+            {
+                if (userRole != "Admin")
+                {
+                    transactionHeader.NonAdminUserID = userID;
+                }
+
+                db.Entry(transactionHeader).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            if (userRole == "Admin")
+                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
+
+            return View(transactionHeader);
+        }
+
+        // GET: TransactionHeaders/Delete/5
+        public ActionResult Delete(string id)
+        {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (Session["UserRole"].ToString() == "Admin")
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
+            if (transactionHeader == null) return HttpNotFound();
+
+            if (Session["UserRole"].ToString() != "Admin" &&
+                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+            return View(transactionHeader);
+        }
+
+        // POST: TransactionHeaders/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(string id)
+        {
+            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
+
+            if (Session["UserRole"].ToString() != "Admin" &&
+                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+            db.TransactionHeader.Remove(transactionHeader);
+            db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+}

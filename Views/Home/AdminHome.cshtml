@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+}
+
+<h2 class="text-primary">Welcome Admin</h2>
+<p class="lead">Use the menu to register users and manage their access.</p>
+
+<div class="card mt-3 p-3">
+    <h4>👤 User Management</h4>
+    <p>Admins can register new users or other admins.</p>
+    <a class="btn btn-dark" href="@Url.Action("Register", "ManageUser")">Register Users</a>
+</div>

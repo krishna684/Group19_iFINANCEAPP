@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "User Dashboard";
+}
+
+<h2 class="text-success">Welcome to iFINANCE</h2>
+<p class="lead">Manage your accounts and transactions efficiently.</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card p-3 mb-3">
+            <h4>📁 Account Groups</h4>
+            <p>Manage your financial groups</p>
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", "AccountGroups")">Go</a>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h4>💳 Master Accounts</h4>
+            <p>Manage account balances</p>
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", "MasterAccounts")">Go</a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-3 mb-3">
+            <h4>💸 Transactions</h4>
+            <p>Record double-entry transactions</p>
+            <a class="btn btn-outline-success" href="@Url.Action("Index", "TransactionHeaders")">Go</a>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <h4>📊 Reports</h4>
+            <p>Generate financial reports</p>
+            <a class="btn btn-outline-info" href="@Url.Action("Index", "GenerateReport")">Go</a>
+        </div>
+    </div>
+</div>

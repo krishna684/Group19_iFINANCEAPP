@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="b06587590ac3474bbd9e911b83d9e6b5" Name="Diagram1">
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.AccountCategory" Width="1.5" PointX="5.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.AccountGroup" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.Administrator" Width="1.5" PointX="3.75" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.MasterAccount" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.NonAdminUser" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.sysdiagrams" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.TransactionHeader" Width="1.5" PointX="3" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.TransactionLine" Width="1.5" PointX="5.25" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="Group19_iFINANCEDBModel.UserPassword" Width="1.5" PointX="1.5" PointY="9" IsExpanded="true" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__AccountGr__Paren__5BE2A6F2" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__MasterAcc__Group__60A75C0F" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__Administrato__ID__52593CB8" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__Transacti__Accou__693CA210" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__NonAdminUser__ID__5535A963" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__Transacti__NonAd__6383C8BA" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK__Transacti__Trans__68487DD7" ManuallyRouted="false" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK_AccountGroup_UserPassword" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK_MasterAccount_UserPassword" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

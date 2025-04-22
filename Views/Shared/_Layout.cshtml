@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - iFINANCE</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            @Html.ActionLink("iFINANCE", "Index", "Home", null, new { @class = "navbar-brand fw-bold text-uppercase" })
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-sm-0">
+                    <li class="nav-item">
+                        @Html.ActionLink("Home", "Index", "Home", null, new { @class = "nav-link" })
+                    </li>
+
+                    @if (Session["UserRole"]?.ToString() == "Admin")
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("Register Users", "Register", "ManageUser", null, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            @Html.ActionLink("Manage Users", "Index", "AdminUsers", null, new { @class = "nav-link" })
+                        </li>
+
+                    }
+
+                    @if (Session["UserRole"]?.ToString() == "User")
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("Account Groups", "Index", "AccountGroups", null, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            @Html.ActionLink("Master Accounts", "Index", "MasterAccounts", null, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            @Html.ActionLink("Transactions", "Index", "TransactionHeaders", null, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            @Html.ActionLink("Reports", "Index", "GenerateReport", null, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            @Html.ActionLink("Change Password", "Index", "ChangePassword", null, new { @class = "nav-link" })
+                        </li>
+                    }
+
+                    @if (Session["UserName"] != null)
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "nav-link text-danger" })
+                        </li>
+                    }
+                </ul>
+
+                <ul class="navbar-nav">
+                    @if (Session["UserName"] != null)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link text-light">
+                                👤 @Session["UserName"] (@Session["UserRole"])
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content mt-4">
+        @RenderBody()
+        <hr />
+        <footer class="text-center text-muted small">
+            <p>&copy; @DateTime.Now.Year - iFINANCE | Group 19</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

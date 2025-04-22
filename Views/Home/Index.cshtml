@@ -1,0 +1,54 @@
+﻿@{
+    ViewBag.Title = "iFINANCE Dashboard";
+}
+
+<main class="container mt-4">
+    <h1 class="text-primary">Welcome to iFINANCE</h1>
+    <p class="lead">Manage your finances efficiently — track accounts, transactions, and generate reports with ease.</p>
+
+    <hr />
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4 bg-white rounded">
+                <h4 class="text-info">🔐 User Management</h4>
+                <p>Admins can add new users and assign roles securely.</p>
+                <a class="btn btn-outline-primary" href="@Url.Action("Register", "ManageUser")">Register Users</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4 bg-white rounded">
+                <h4 class="text-success">📁 Account Groups</h4>
+                <p>Create, update, or delete financial account groups.</p>
+                <a class="btn btn-outline-success" href="#">Manage Groups</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4 bg-white rounded">
+                <h4 class="text-warning">💸 Transactions</h4>
+                <p>Record and track double-entry transactions easily.</p>
+                <a class="btn btn-outline-warning" href="#">Record Transaction</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow p-3 mb-4 bg-white rounded">
+                <h4 class="text-danger">📊 Financial Reports</h4>
+                <p>Generate Trial Balance, Balance Sheet, and more.</p>
+                <a class="btn btn-outline-danger" href="#">View Reports</a>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow p-3 mb-4 bg-white rounded">
+                <h4 class="text-dark">🚪 Logout</h4>
+                <p>Securely sign out of your iFINANCE session.</p>
+                <a class="btn btn-outline-dark" href="@Url.Action("Logout", "Auth")">Logout</a>
+            </div>
+        </div>
+    </div>
+</main>

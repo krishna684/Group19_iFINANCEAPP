@@ -1,14 +1,7 @@
-﻿@model Group19_iFINANCEAPP.Models.UserPassword
-
-@{
-    ViewBag.Title = "Edit User";
-}
-
-<h2>Edit User</h2>
-
-@using (Html.BeginForm())
+﻿@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ID)
 
     <div class="form-group">
         @Html.LabelFor(m => m.UserName)

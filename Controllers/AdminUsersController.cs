@@ -29,7 +29,6 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Details(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword.Find(id);
@@ -42,7 +41,6 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Edit(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword.Find(id);
@@ -51,7 +49,7 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(user);
         }
 
-        // POST: AdminUsers/Edit/5
+        // ✅ POST: AdminUsers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,UserName,EncryptedPassword,PasswordExpiryTime,UserAccountExpiryDate")] UserPassword user)
@@ -60,11 +58,24 @@ namespace Group19_iFINANCEAPP.Controllers
 
             if (ModelState.IsValid)
             {
-                db.Entry(user).State = System.Data.Entity.EntityState.Modified;
+                var existing = db.UserPassword.Find(user.ID);
+                if (existing == null)
+                {
+                    ModelState.AddModelError("", "User not found.");
+                    return View(user);
+                }
+
+                existing.UserName = user.UserName;
+                existing.EncryptedPassword = user.EncryptedPassword;
+                existing.PasswordExpiryTime = user.PasswordExpiryTime;
+                existing.UserAccountExpiryDate = user.UserAccountExpiryDate;
+
                 db.SaveChanges();
+                TempData["Saved"] = "User updated successfully.";
                 return RedirectToAction("Index");
             }
 
+            TempData["Saved"] = "Edit failed — invalid data.";
             return View(user);
         }
 
@@ -72,7 +83,6 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Delete(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword.Find(id);
@@ -91,7 +101,6 @@ namespace Group19_iFINANCEAPP.Controllers
             if (!IsAdmin() || user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            // Remove from Admin or NonAdmin first
             var admin = db.Administrator.Find(id);
             if (admin != null) db.Administrator.Remove(admin);
 
@@ -101,6 +110,7 @@ namespace Group19_iFINANCEAPP.Controllers
             db.UserPassword.Remove(user);
             db.SaveChanges();
 
+            TempData["Saved"] = "User deleted.";
             return RedirectToAction("Index");
         }
     }

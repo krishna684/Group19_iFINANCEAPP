@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Group19_iFINANCEAPP.Controllers.BalanceSheetEntry>
+@{
+    ViewBag.Title = "Balance Sheet";
+}
+<h2>Balance Sheet</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Account</th>
+        <th>Group</th>
+        <th>Type</th>
+        <th>Balance</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.AccountName</td>
+            <td>@item.Group</td>
+            <td>@item.Type</td>
+            <td>@item.Balance.ToString("C")</td>
+        </tr>
+    }
+</table>

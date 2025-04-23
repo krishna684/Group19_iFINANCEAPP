@@ -135,6 +135,7 @@
     <Compile Include="Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\ChangePasswordController.cs" />
+    <Compile Include="Controllers\GenerateReportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageUserController.cs" />
     <Compile Include="Controllers\MasterAccountsController.cs" />
@@ -306,6 +307,8 @@
     <Content Include="Views\AdminUsers\Details.cshtml" />
     <Content Include="Views\AdminUsers\Edit.cshtml" />
     <Content Include="Views\AdminUsers\Delete.cshtml" />
+    <Content Include="Views\GenerateReport\TrialBalance.cshtml" />
+    <Content Include="Views\GenerateReport\BalanceSheet.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

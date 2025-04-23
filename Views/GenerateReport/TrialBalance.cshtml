@@ -1,0 +1,21 @@
+﻿@model IEnumerable<Group19_iFINANCEAPP.Controllers.TrialBalanceEntry>
+@{
+    ViewBag.Title = "Trial Balance";
+}
+<h2>Trial Balance</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Account</th>
+        <th>Debit</th>
+        <th>Credit</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.AccountName</td>
+            <td>@item.Debit.ToString("C")</td>
+            <td>@item.Credit.ToString("C")</td>
+        </tr>
+    }
+</table>

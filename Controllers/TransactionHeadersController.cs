@@ -18,45 +18,19 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Index()
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
 
-
-            string userID = Session["UserID"].ToString();
-            string userRole = Session["UserRole"].ToString();
-
-            var transactionHeader = db.TransactionHeader.Include(t => t.NonAdminUser);
-
-            if (userRole != "Admin")
-            {
-                transactionHeader = transactionHeader.Where(t => t.NonAdminUserID == userID);
-            }
-
-            return View(transactionHeader.ToList());
+            var transactions = db.TransactionHeader.Include(t => t.NonAdminUser);
+            return View(transactions.ToList());
         }
 
         // GET: TransactionHeaders/Details/5
         public ActionResult Details(string id)
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
             if (transactionHeader == null) return HttpNotFound();
-
-            if (Session["UserRole"].ToString() != "Admin" &&
-                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
 
             return View(transactionHeader);
         }
@@ -65,16 +39,8 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Create()
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
 
-
-            // Hide dropdown for non-admins
-            if (Session["UserRole"].ToString() == "Admin")
-                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name");
-
+            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name");
             return View();
         }
 
@@ -84,28 +50,15 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Create([Bind(Include = "ID,Date,Description,NonAdminUserID")] TransactionHeader transactionHeader)
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-           
-
-
-            string userRole = Session["UserRole"].ToString();
-            string userID = Session["UserID"].ToString();
 
             if (ModelState.IsValid)
             {
-                // If not admin, force user's own ID
-                if (userRole != "Admin")
-                {
-                    transactionHeader.NonAdminUserID = userID;
-                }
-
                 db.TransactionHeader.Add(transactionHeader);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            if (userRole == "Admin")
-                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-
+            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
             return View(transactionHeader);
         }
 
@@ -113,26 +66,12 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Edit(string id)
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
             if (transactionHeader == null) return HttpNotFound();
 
-            if (Session["UserRole"].ToString() != "Admin" &&
-                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-            if (Session["UserRole"].ToString() == "Admin")
-                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-
+            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
             return View(transactionHeader);
         }
 
@@ -143,24 +82,14 @@ namespace Group19_iFINANCEAPP.Controllers
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
 
-            string userRole = Session["UserRole"].ToString();
-            string userID = Session["UserID"].ToString();
-
             if (ModelState.IsValid)
             {
-                if (userRole != "Admin")
-                {
-                    transactionHeader.NonAdminUserID = userID;
-                }
-
                 db.Entry(transactionHeader).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            if (userRole == "Admin")
-                ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-
+            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
             return View(transactionHeader);
         }
 
@@ -168,22 +97,10 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult Delete(string id)
         {
             if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
             if (transactionHeader == null) return HttpNotFound();
-
-            if (Session["UserRole"].ToString() != "Admin" &&
-                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
 
             return View(transactionHeader);
         }
@@ -193,14 +110,9 @@ namespace Group19_iFINANCEAPP.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
+            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+
             TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
-
-            if (Session["UserRole"].ToString() != "Admin" &&
-                transactionHeader.NonAdminUserID != Session["UserID"].ToString())
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
             db.TransactionHeader.Remove(transactionHeader);
             db.SaveChanges();
             return RedirectToAction("Index");

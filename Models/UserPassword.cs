@@ -26,6 +26,9 @@ namespace Group19_iFINANCEAPP.Models
         public string EncryptedPassword { get; set; }
         public int PasswordExpiryTime { get; set; }
         public System.DateTime UserAccountExpiryDate { get; set; }
+        public string SecurityQuestion { get; set; }
+        public string SecurityAnswer { get; set; }
+        public string CreatedByID { get; set; }
     
         public virtual Administrator Administrator { get; set; }
         public virtual NonAdminUser NonAdminUser { get; set; }

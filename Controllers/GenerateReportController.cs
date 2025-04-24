@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Group19_iFINANCEAPP.Models;
+using Rotativa;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
@@ -10,58 +11,103 @@ namespace Group19_iFINANCEAPP.Controllers
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        private bool IsUser()
+        public ActionResult Index()
         {
-            return Session["UserRole"]?.ToString() == "User";
+            if (Session["UserRole"]?.ToString() != "User")
+                return new HttpStatusCodeResult(403);
+
+            return View();
         }
 
-        // GET: /GenerateReport/TrialBalance
-        public ActionResult TrialBalance()
+        public ActionResult Generate(string reportType, DateTime? fromDate, DateTime? toDate)
         {
-            if (Session["UserID"] == null || !IsUser())
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            if (string.IsNullOrEmpty(reportType)) return RedirectToAction("Index");
 
-            string userID = Session["UserID"].ToString();
-
-            var trialBalance = db.MasterAccount
-                .Where(m => m.UserID == userID)
-                .Select(m => new TrialBalanceEntry
-                {
-                    AccountName = m.Name,
-                    Debit = db.TransactionLine
-                                .Where(tl => tl.AccountID == m.ID)
-                                .Sum(tl => (decimal?)tl.DebitedAmount) ?? 0,
-                    Credit = db.TransactionLine
-                                .Where(tl => tl.AccountID == m.ID)
-                                .Sum(tl => (decimal?)tl.CreditedAmount) ?? 0
-                }).ToList();
-
-            return View(trialBalance);
+            return RedirectToAction(reportType, new { fromDate, toDate });
         }
 
-        // GET: /GenerateReport/BalanceSheet
-        public ActionResult BalanceSheet()
+        public ActionResult TrialBalance(DateTime? fromDate, DateTime? toDate)
         {
-            if (Session["UserID"] == null || !IsUser())
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            var model = GetTrialBalanceData(fromDate, toDate);
+            return View(model);
+        }
 
-            string userID = Session["UserID"].ToString();
+        public ActionResult TrialBalancePdf()
+        {
+            var model = GetTrialBalanceData(null, null); // 👈 no filtering
+            return new Rotativa.ViewAsPdf("TrialBalance", model)
+            {
+                FileName = "TrialBalance.pdf"
+            };
+        }
 
-            var balanceSheet = db.MasterAccount
-                .Where(m => m.UserID == userID)
-                .Select(m => new BalanceSheetEntry
+        public ActionResult BalanceSheet(DateTime? fromDate, DateTime? toDate)
+        {
+            var model = GetBalanceSheetData(fromDate, toDate);
+            return View(model);
+        }
+
+        public ActionResult BalanceSheetPdf()
+        {
+            var model = GetBalanceSheetData(null, null); // 👈 no filtering
+            return new Rotativa.ViewAsPdf("BalanceSheet", model)
+            {
+                FileName = "BalanceSheet.pdf"
+            };
+        }
+
+        private List<TrialBalanceEntry> GetTrialBalanceData(DateTime? from, DateTime? to)
+        {
+            string userId = Session["UserID"].ToString();
+            var accounts = db.MasterAccount.Where(m => m.UserID == userId).ToList();
+            var lines = db.TransactionLine
+                          .Where(t => t.TransactionHeader.NonAdminUserID == userId)
+                          .ToList();
+
+            if (from.HasValue) lines = lines.Where(t => t.TransactionHeader.Date >= from.Value).ToList();
+            if (to.HasValue) lines = lines.Where(t => t.TransactionHeader.Date <= to.Value).ToList();
+
+            var result = accounts.Select(account => new TrialBalanceEntry
+            {
+                AccountName = account.Name,
+                Debit = lines.Where(l => l.AccountID == account.ID).Sum(l => l.DebitedAmount),
+                Credit = lines.Where(l => l.AccountID == account.ID).Sum(l => l.CreditedAmount)
+            }).ToList();
+
+            return result;
+        }
+
+        private List<BalanceSheetEntry> GetBalanceSheetData(DateTime? from, DateTime? to)
+        {
+            string userId = Session["UserID"].ToString();
+            var accounts = db.MasterAccount.Where(m => m.UserID == userId).ToList();
+            var groups = db.AccountGroup.Where(g => g.UserID == userId).ToList();
+            var lines = db.TransactionLine
+                          .Where(t => t.TransactionHeader.NonAdminUserID == userId)
+                          .ToList();
+
+            if (from.HasValue) lines = lines.Where(t => t.TransactionHeader.Date >= from.Value).ToList();
+            if (to.HasValue) lines = lines.Where(t => t.TransactionHeader.Date <= to.Value).ToList();
+
+            var result = groups.Select(group =>
+            {
+                var groupAccounts = accounts.Where(a => a.GroupID == group.ID).Select(a => a.ID).ToList();
+                decimal debit = lines.Where(l => groupAccounts.Contains(l.AccountID)).Sum(l => l.DebitedAmount);
+                decimal credit = lines.Where(l => groupAccounts.Contains(l.AccountID)).Sum(l => l.CreditedAmount);
+                decimal net = debit - credit;
+
+                return new BalanceSheetEntry
                 {
-                    AccountName = m.Name,
-                    Group = m.AccountGroup.Name,
-                    Type = m.AccountGroup.ElementType,
-                    Balance = m.ClosingAmount
-                }).ToList();
+                    Category = group.Name,
+                    Type = group.ElementType,
+                    Amount = net
+                };
+            }).ToList();
 
-            return View(balanceSheet);
+            return result;
         }
     }
 
-    // DTOs for views
     public class TrialBalanceEntry
     {
         public string AccountName { get; set; }
@@ -71,9 +117,8 @@ namespace Group19_iFINANCEAPP.Controllers
 
     public class BalanceSheetEntry
     {
-        public string AccountName { get; set; }
-        public string Group { get; set; }
+        public string Category { get; set; }
         public string Type { get; set; }
-        public decimal Balance { get; set; }
+        public decimal Amount { get; set; }
     }
 }

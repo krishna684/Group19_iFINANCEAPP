@@ -1,51 +1,43 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.MasterAccount>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Master Accounts";
 }
 
-<h2>Index</h2>
+<div class="container mt-4">
+    <h2 class="mb-3">📚 Master Accounts</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.OpeningAmount)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ClosingAmount)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AccountGroup.Name)
-        </th>
-        <th></th>
-    </tr>
+    <p>
+        @Html.ActionLink("➕ Create New Account", "Create", null, new { @class = "btn btn-primary" })
+    </p>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.OpeningAmount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.ClosingAmount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AccountGroup.Name)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
-        </td>
-    </tr>
-}
-
-</table>
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.ID)</th>
+                <th>@Html.DisplayNameFor(model => model.Name)</th>
+                <th>@Html.DisplayNameFor(model => model.OpeningAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.ClosingAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.GroupID)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.ID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.OpeningAmount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ClosingAmount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.GroupID)</td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id = item.ID }, new { @class = "btn btn-sm btn-info me-1" })
+                        @Html.ActionLink("Edit", "Edit", new { id = item.ID }, new { @class = "btn btn-sm btn-warning me-1" })
+                        @Html.ActionLink("Delete", "Delete", new { id = item.ID }, new { @class = "btn btn-sm btn-danger" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

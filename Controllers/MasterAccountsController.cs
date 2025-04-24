@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using Group19_iFINANCEAPP.Models;
 
@@ -14,46 +12,55 @@ namespace Group19_iFINANCEAPP.Controllers
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
+        private bool IsLoggedIn() => Session["UserID"] != null;
+        private bool IsAdmin() => Session["UserRole"]?.ToString() == "Admin";
+        private string CurrentUserID() => Session["UserID"].ToString();
+
+        private string GenerateNewMasterAccountID(string userID)
+        {
+            var lastAccount = db.MasterAccount
+                                .Where(m => m.UserID == userID && m.ID.StartsWith(userID + "_ACC"))
+                                .OrderByDescending(m => m.ID)
+                                .FirstOrDefault();
+
+            int nextNumber = 1;
+
+            if (lastAccount != null && lastAccount.ID.Length > userID.Length + 4)
+            {
+                string numericPart = lastAccount.ID.Substring(userID.Length + 4);
+                if (int.TryParse(numericPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            return $"{userID}_ACC{nextNumber:D4}";
+        }
+
         // GET: MasterAccounts
         public ActionResult Index()
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
+            string userID = CurrentUserID();
+            var masterAccounts = db.MasterAccount
+                                   .Include(m => m.AccountGroup)
+                                   .Where(m => m.UserID == userID);
 
-            string userID = Session["UserID"].ToString();
-            string userRole = Session["UserRole"].ToString();
-
-            var masterAccount = db.MasterAccount.Include(m => m.AccountGroup);
-
-            if (userRole != "Admin")
-            {
-                masterAccount = masterAccount.Where(m => m.UserID == userID);
-            }
-
-            return View(masterAccount.ToList());
+            return View(masterAccounts.ToList());
         }
 
         // GET: MasterAccounts/Details/5
         public ActionResult Details(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            MasterAccount masterAccount = db.MasterAccount.Find(id);
+            var masterAccount = db.MasterAccount.Find(id);
             if (masterAccount == null) return HttpNotFound();
-
-            if (Session["UserRole"].ToString() != "Admin" && masterAccount.UserID != Session["UserID"].ToString())
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (masterAccount.UserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
             return View(masterAccount);
         }
@@ -61,15 +68,21 @@ namespace Group19_iFINANCEAPP.Controllers
         // GET: MasterAccounts/Create
         public ActionResult Create()
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
+            string userID = CurrentUserID();
+            ViewBag.GroupID = new SelectList(
+                db.AccountGroup.Where(g => g.UserID == userID),
+                "ID", "Name"
+            );
+
+            var model = new MasterAccount
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
+                ID = GenerateNewMasterAccountID(userID)
+            };
 
-
-            ViewBag.GroupID = new SelectList(db.AccountGroup, "ID", "Name");
-            return View();
+            return View(model);
         }
 
         // POST: MasterAccounts/Create
@@ -77,39 +90,42 @@ namespace Group19_iFINANCEAPP.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Name,OpeningAmount,ClosingAmount,GroupID")] MasterAccount masterAccount)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
 
             if (ModelState.IsValid)
             {
-                masterAccount.UserID = Session["UserID"].ToString(); // assign owner
+                masterAccount.UserID = CurrentUserID();
                 db.MasterAccount.Add(masterAccount);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.GroupID = new SelectList(db.AccountGroup, "ID", "Name", masterAccount.GroupID);
+            // 🛠 Re-populate dropdown if validation fails
+            string userID = CurrentUserID();
+            ViewBag.GroupID = new SelectList(
+                db.AccountGroup.Where(g => g.UserID == userID),
+                "ID", "Name", masterAccount.GroupID
+            );
+
             return View(masterAccount);
         }
 
         // GET: MasterAccounts/Edit/5
         public ActionResult Edit(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            MasterAccount masterAccount = db.MasterAccount.Find(id);
+            var masterAccount = db.MasterAccount.Find(id);
             if (masterAccount == null) return HttpNotFound();
+            if (masterAccount.UserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            if (Session["UserRole"].ToString() != "Admin" && masterAccount.UserID != Session["UserID"].ToString())
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            ViewBag.GroupID = new SelectList(
+                db.AccountGroup.Where(g => g.UserID == masterAccount.UserID),
+                "ID", "Name", masterAccount.GroupID
+            );
 
-            ViewBag.GroupID = new SelectList(db.AccountGroup, "ID", "Name", masterAccount.GroupID);
             return View(masterAccount);
         }
 
@@ -118,37 +134,36 @@ namespace Group19_iFINANCEAPP.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,OpeningAmount,ClosingAmount,GroupID")] MasterAccount masterAccount)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
 
             if (ModelState.IsValid)
             {
-                masterAccount.UserID = Session["UserID"].ToString(); // ensure owner is preserved
+                masterAccount.UserID = CurrentUserID();
                 db.Entry(masterAccount).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.GroupID = new SelectList(db.AccountGroup, "ID", "Name", masterAccount.GroupID);
+            // 🛠 Re-populate dropdown if validation fails
+            string userID = CurrentUserID();
+            ViewBag.GroupID = new SelectList(
+                db.AccountGroup.Where(g => g.UserID == userID),
+                "ID", "Name", masterAccount.GroupID
+            );
+
             return View(masterAccount);
         }
 
         // GET: MasterAccounts/Delete/5
         public ActionResult Delete(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
-            if (Session["UserRole"].ToString() == "Admin")
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            }
-
-
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            MasterAccount masterAccount = db.MasterAccount.Find(id);
+            var masterAccount = db.MasterAccount.Find(id);
             if (masterAccount == null) return HttpNotFound();
-
-            if (Session["UserRole"].ToString() != "Admin" && masterAccount.UserID != Session["UserID"].ToString())
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (masterAccount.UserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
             return View(masterAccount);
         }
@@ -158,10 +173,16 @@ namespace Group19_iFINANCEAPP.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
-            MasterAccount masterAccount = db.MasterAccount.Find(id);
+            var masterAccount = db.MasterAccount.Find(id);
+            if (masterAccount.UserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            if (Session["UserRole"].ToString() != "Admin" && masterAccount.UserID != Session["UserID"].ToString())
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            // 🛡 Prevent delete if linked to transactions
+            bool hasTransactions = db.TransactionLine.Any(t => t.ID == id);
+            if (hasTransactions)
+            {
+                TempData["DeleteError"] = "❌ This account is linked to transactions and cannot be deleted.";
+                return RedirectToAction("Delete", new { id = id });
+            }
 
             db.MasterAccount.Remove(masterAccount);
             db.SaveChanges();
@@ -170,10 +191,7 @@ namespace Group19_iFINANCEAPP.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }

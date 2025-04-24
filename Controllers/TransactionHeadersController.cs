@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using Group19_iFINANCEAPP.Models;
 
@@ -14,116 +12,263 @@ namespace Group19_iFINANCEAPP.Controllers
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // GET: TransactionHeaders
+        private bool IsLoggedIn() => Session["UserID"] != null;
+        private bool IsAdmin() => Session["UserRole"]?.ToString() == "Admin";
+        private string CurrentUserID() => Session["UserID"].ToString();
+
+        private string GenerateTransactionID(string userID)
+        {
+            var last = db.TransactionHeader
+                         .Where(t => t.NonAdminUserID == userID && t.ID.StartsWith(userID + "_TRX"))
+                         .OrderByDescending(t => t.ID)
+                         .FirstOrDefault();
+
+            int next = 1;
+            if (last != null && last.ID.Length > userID.Length + 4)
+            {
+                string numPart = last.ID.Substring(userID.Length + 4);
+                if (int.TryParse(numPart, out int lastNum)) next = lastNum + 1;
+            }
+            return $"{userID}_TRX{next:D4}";
+        }
+
         public ActionResult Index()
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
 
-            var transactions = db.TransactionHeader.Include(t => t.NonAdminUser);
-            return View(transactions.ToList());
+            string uid = CurrentUserID();
+            var transactions = db.TransactionHeader
+                                 .Include(t => t.TransactionLine)
+                                 .Where(t => t.NonAdminUserID == uid)
+                                 .ToList();
+
+            return View(transactions);
         }
 
-        // GET: TransactionHeaders/Details/5
         public ActionResult Details(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
-            if (transactionHeader == null) return HttpNotFound();
+            string userID = CurrentUserID(); // ✅ cache it first
+            var header = db.TransactionHeader
+                           .Include(t => t.TransactionLine)
+                           .FirstOrDefault(t => t.ID == id);
 
-            return View(transactionHeader);
+            if (header == null || header.NonAdminUserID != userID)
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
+            return View(header);
         }
 
-        // GET: TransactionHeaders/Create
+
         public ActionResult Create()
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name");
-            return View();
+            string userID = CurrentUserID();
+
+            ViewBag.MasterAccounts = db.MasterAccount
+                .Where(m => m.UserID == userID)
+                .Select(m => new SelectListItem { Value = m.ID, Text = m.Name })
+                .ToList();
+
+            var header = new TransactionHeader
+            {
+                ID = GenerateTransactionID(userID),
+                Date = DateTime.Now
+            };
+
+            return View(header);
         }
 
-        // POST: TransactionHeaders/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Date,Description,NonAdminUserID")] TransactionHeader transactionHeader)
+        public ActionResult Create(TransactionHeader header, List<TransactionLine> Lines)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            string userID = CurrentUserID();
 
-            if (ModelState.IsValid)
+            if (Lines == null || Lines.Count < 2)
+                ModelState.AddModelError("", "❌ At least two transaction lines are required.");
+
+            decimal totalDebit = 0m, totalCredit = 0m;
+            bool allLinesValid = true;
+
+            foreach (var line in Lines)
             {
-                db.TransactionHeader.Add(transactionHeader);
+                bool valid = (line.DebitedAmount > 0 && line.CreditedAmount == 0)
+                          || (line.DebitedAmount == 0 && line.CreditedAmount > 0);
+
+                if (!valid)
+                {
+                    ModelState.AddModelError("", "❌ Each line must have either a debit or a credit, not both.");
+                    allLinesValid = false;
+                    break;
+                }
+
+                totalDebit += line.DebitedAmount;
+                totalCredit += line.CreditedAmount;
+            }
+
+            if (totalDebit != totalCredit)
+            {
+                ModelState.AddModelError("", "❌ Total debits must equal total credits.");
+                allLinesValid = false;
+            }
+
+            if (ModelState.IsValid && allLinesValid)
+            {
+                header.NonAdminUserID = userID;
+                db.TransactionHeader.Add(header);
+                db.SaveChanges();
+
+                foreach (var line in Lines)
+                {
+                    line.ID = Guid.NewGuid().ToString();
+                    line.TransactionID = header.ID;
+                    db.TransactionLine.Add(line);
+                }
+
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-            return View(transactionHeader);
+            ViewBag.MasterAccounts = db.MasterAccount
+                .Where(m => m.UserID == userID)
+                .Select(m => new SelectListItem { Value = m.ID, Text = m.Name })
+                .ToList();
+
+            return View(header);
         }
 
-        // GET: TransactionHeaders/Edit/5
         public ActionResult Edit(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
-            if (transactionHeader == null) return HttpNotFound();
+            var header = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
+            if (header == null || header.NonAdminUserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-            return View(transactionHeader);
+            string userID = CurrentUserID();
+            ViewBag.MasterAccounts = db.MasterAccount
+                .Where(m => m.UserID == userID)
+                .Select(m => new SelectListItem { Value = m.ID, Text = m.Name })
+                .ToList();
+
+            return View(header);
         }
 
-        // POST: TransactionHeaders/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Date,Description,NonAdminUserID")] TransactionHeader transactionHeader)
+        public ActionResult Edit(TransactionHeader header, List<TransactionLine> Lines)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            string userID = Session["UserID"].ToString();
 
-            if (ModelState.IsValid)
+            if (Lines == null || Lines.Count < 2)
+                ModelState.AddModelError("", "❌ At least two transaction lines are required.");
+
+            decimal totalDebit = 0m, totalCredit = 0m;
+            bool allLinesValid = true;
+
+            foreach (var line in Lines)
             {
-                db.Entry(transactionHeader).State = EntityState.Modified;
+                bool validLine = (line.DebitedAmount > 0 && line.CreditedAmount == 0)
+                              || (line.DebitedAmount == 0 && line.CreditedAmount > 0);
+
+                if (!validLine)
+                {
+                    ModelState.AddModelError("", "❌ Each line must have either debit or credit — not both or none.");
+                    allLinesValid = false;
+                    break;
+                }
+
+                totalDebit += line.DebitedAmount;
+                totalCredit += line.CreditedAmount;
+            }
+
+            if (totalDebit != totalCredit)
+            {
+                ModelState.AddModelError("", "❌ Total debit must equal total credit.");
+                allLinesValid = false;
+            }
+
+            if (ModelState.IsValid && allLinesValid)
+            {
+                header.NonAdminUserID = userID;
+                db.Entry(header).State = EntityState.Modified;
+
+                // Delete existing lines
+                var oldLines = db.TransactionLine.Where(t => t.TransactionID == header.ID).ToList();
+                foreach (var old in oldLines) db.TransactionLine.Remove(old);
+                db.SaveChanges();
+
+                // Add new lines
+                foreach (var line in Lines)
+                {
+                    line.ID = Guid.NewGuid().ToString();
+                    line.TransactionID = header.ID;
+                    db.TransactionLine.Add(line);
+                }
+
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.NonAdminUserID = new SelectList(db.NonAdminUser, "ID", "Name", transactionHeader.NonAdminUserID);
-            return View(transactionHeader);
+            // ✅ Preserve user's lines on error
+            header.TransactionLine = Lines;
+
+            ViewBag.MasterAccounts = db.MasterAccount
+                .Where(m => m.UserID == userID)
+                .Select(m => new SelectListItem { Value = m.ID, Text = m.Name })
+                .ToList();
+
+            return View(header);
         }
 
-        // GET: TransactionHeaders/Delete/5
         public ActionResult Delete(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
-            if (transactionHeader == null) return HttpNotFound();
+            var header = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
+            if (header == null || header.NonAdminUserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            return View(transactionHeader);
+            return View(header);
         }
 
-        // POST: TransactionHeaders/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
-            if (Session["UserID"] == null) return RedirectToAction("Login", "Auth");
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+            string userID = CurrentUserID();
 
-            TransactionHeader transactionHeader = db.TransactionHeader.Find(id);
-            db.TransactionHeader.Remove(transactionHeader);
+            var transaction = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
+            if (transaction == null || transaction.NonAdminUserID != userID)
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
+            bool isLocked = false;
+            if (isLocked)
+            {
+                TempData["DeleteError"] = "❌ This transaction is locked and cannot be deleted.";
+                return RedirectToAction("Delete", new { id = id });
+            }
+
+            foreach (var line in transaction.TransactionLine.ToList())
+            {
+                db.TransactionLine.Remove(line);
+            }
+
+            db.TransactionHeader.Remove(transaction);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }

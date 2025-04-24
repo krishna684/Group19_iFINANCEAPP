@@ -1,45 +1,34 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.AccountGroup>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Account Groups";
 }
 
-<h2>Index</h2>
+<h2>Account Groups</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New Group", "Create", null, new { @class = "btn btn-primary" })
 </p>
-<table class="table">
+
+<table class="table table-bordered">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ElementType)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AccountGroup2.Name)
-        </th>
-        <th></th>
+        <th>@Html.DisplayNameFor(model => model.Name)</th>
+        <th>@Html.DisplayNameFor(model => model.ElementType)</th>
+        <th>@Html.DisplayNameFor(model => model.ParentGroupID)</th>
+        <th>Actions</th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.ElementType)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AccountGroup2.Name)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
-        </td>
-    </tr>
-}
-
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+            <td>@Html.DisplayFor(modelItem => item.ElementType)</td>
+            <td>@Html.DisplayFor(modelItem => item.ParentGroupID)</td>
+            <td>
+                @Html.ActionLink("Details", "Details", new { id = item.ID }, new { @class = "btn btn-info btn-sm" }) |
+                @Html.ActionLink("Edit", "Edit", new { id = item.ID }, new { @class = "btn btn-warning btn-sm" }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.ID }, new { @class = "btn btn-danger btn-sm" })
+            </td>
+        </tr>
+    }
 </table>

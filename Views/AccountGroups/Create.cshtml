@@ -1,10 +1,10 @@
 ﻿@model Group19_iFINANCEAPP.Models.AccountGroup
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Create Account Group";
 }
 
-<h2>Create</h2>
+<h2>Create Account Group</h2>
 
 @using (Html.BeginForm())
 {
@@ -18,7 +18,15 @@
         <div class="form-group">
             @Html.LabelFor(model => model.ID, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.ID, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.ID, new
+                {
+                    htmlAttributes = new
+                    {
+                        @class = "form-control",
+                        @readonly = "readonly",
+                        title = "This ID is automatically generated (e.g., USR123_GRP0001) and cannot be changed."
+                    }
+                })
                 @Html.ValidationMessageFor(model => model.ID, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -26,41 +34,52 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.Name, new
+                {
+                    htmlAttributes = new
+                    {
+                        @class = "form-control",
+                        title = "Enter the name of the account group (e.g., 'Cash', 'Marketing')."
+                    }
+                })
                 @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ParentGroupID, "ParentGroupID", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("ParentGroupID", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.ParentGroupID, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.ElementType, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownListFor(model => model.ElementType, new SelectList(
-                    new[] { "Assets", "Liabilities", "Income", "Expenses" }
-                ), "Select Type", new { @class = "form-control" })
+                @Html.DropDownListFor(model => model.ElementType,
+                    new SelectList(new[] { "Assets", "Liabilities", "Income", "Expenses" }),
+                    "Select Type", new
+                         {
+                        @class = "form-control",
+                        title = "Select the financial category this group belongs to."
+                    })
                 @Html.ValidationMessageFor(model => model.ElementType, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
+            @Html.LabelFor(model => model.ParentGroupID, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("ParentGroupID", (SelectList)ViewBag.ParentGroupID, "None", new
+                {
+                    @class = "form-control",
+                    title = "Optional: Select a parent group if this is a sub-group. Choose 'None' to create a top-level group."
+                })
+                @Html.ValidationMessageFor(model => model.ParentGroupID, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <input type="submit" value="Create" class="btn btn-primary" title="Click to create the new account group." />
             </div>
         </div>
     </div>
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default", title = "Return to the group list." })
 </div>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}

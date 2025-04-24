@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Cash Flow Statement";
+}
+
+<h2>Cash Flow Statement</h2>
+
+@if (ViewBag.CashFlowData != null)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Activity</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.CashFlowData)
+            {
+                <tr>
+                    <td>@item.Activity</td>
+                    <td>@String.Format("{0:C}", item.Amount)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No cash flow data available for the selected period.</p>
+}

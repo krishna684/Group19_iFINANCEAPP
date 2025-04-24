@@ -1,56 +1,51 @@
 ﻿@model Group19_iFINANCEAPP.Models.MasterAccount
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Delete Master Account";
 }
 
-<h2>Delete</h2>
-
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>MasterAccount</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.OpeningAmount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.OpeningAmount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ClosingAmount)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ClosingAmount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountGroup.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountGroup.Name)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+<div class="container mt-4">
+    <div class="card shadow rounded border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">❌ Confirm Deletion</h4>
         </div>
-    }
+        <div class="card-body">
+
+            @* Show a warning alert if deletion is blocked *@
+            @if (TempData["DeleteError"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    @TempData["DeleteError"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <p class="lead">Are you sure you want to delete the following master account?</p>
+
+            <dl class="row">
+                <dt class="col-sm-4">Account ID</dt>
+                <dd class="col-sm-8">@Model.ID</dd>
+
+                <dt class="col-sm-4">Account Name</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+
+                <dt class="col-sm-4">Opening Amount</dt>
+                <dd class="col-sm-8">@Model.OpeningAmount</dd>
+
+                <dt class="col-sm-4">Closing Amount</dt>
+                <dd class="col-sm-8">@Model.ClosingAmount</dd>
+
+                <dt class="col-sm-4">Group ID</dt>
+                <dd class="col-sm-8">@Model.GroupID</dd>
+            </dl>
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.ID" />
+                <button type="submit" class="btn btn-danger" title="Delete this account permanently.">🗑️ Delete</button>
+                @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-outline-secondary ms-2", title = "Back to list" })
+            }
+        </div>
+    </div>
 </div>

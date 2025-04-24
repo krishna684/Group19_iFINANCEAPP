@@ -1,58 +1,123 @@
 ﻿@model Group19_iFINANCEAPP.Models.TransactionHeader
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Title = "Edit Transaction";
+    var masterAccounts = ViewBag.MasterAccounts as List<SelectListItem>;
 }
 
-<h2>Edit</h2>
+<h2>Edit Transaction</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <h5 class="mb-2">⚠️ Please fix the following errors:</h5>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
 
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>TransactionHeader</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.ID)
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Date, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Date, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning text-dark">Transaction Header</div>
+        <div class="card-body">
+            <div class="form-group mb-2">
+                @Html.LabelFor(m => m.ID)
+                @Html.TextBoxFor(m => m.ID, new { @class = "form-control", @readonly = "readonly" })
             </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+            <div class="form-group mb-2">
+                @Html.LabelFor(m => m.Date)
+                @Html.TextBoxFor(m => m.Date, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
             </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.NonAdminUserID, "NonAdminUserID", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("NonAdminUserID", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.NonAdminUserID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+            <div class="form-group mb-2">
+                @Html.LabelFor(m => m.Description)
+                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3 })
             </div>
         </div>
     </div>
-}
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+    <div class="card shadow mb-4">
+        <div class="card-header bg-secondary text-white">Transaction Lines</div>
+        <div class="card-body">
+            <table class="table table-bordered" id="linesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Account</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Comment</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="lineItems">
+                    @{
+                        int index = 0;
+                        foreach (var line in Model.TransactionLine)
+                        {
+                            <tr>
+                                <td>
+                                    <select name="Lines[@index].AccountID" class="form-control" required>
+                                        <option value="">Select Account</option>
+                                        @foreach (var acc in masterAccounts)
+                                        {
+                                            <option value="@acc.Value" @(acc.Value == line.AccountID ? "selected" : "")>@acc.Text</option>
+                                        }
+                                    </select>
+                                    <input type="hidden" name="Lines[@index].ID" value="@line.ID" />
+                                </td>
+                                <td><input type="number" name="Lines[@index].DebitedAmount" value="@line.DebitedAmount" class="form-control" step="0.01" min="0" /></td>
+                                <td><input type="number" name="Lines[@index].CreditedAmount" value="@line.CreditedAmount" class="form-control" step="0.01" min="0" /></td>
+                                <td><input type="text" name="Lines[@index].Comments" value="@line.Comments" class="form-control" /></td>
+                                <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">✖</button></td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <button type="button" class="btn btn-outline-primary mt-2" onclick="addLine()">➕ Add Line</button>
+        </div>
+    </div>
+
+    <div class="text-end mt-3">
+        <input type="submit" value="Save Changes" class="btn btn-success" />
+        @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary ms-2" })
+    </div>
+}
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        let lineIndex = @(Model.TransactionLine != null ? Model.TransactionLine.Count : 0);
+        const masterAccounts = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MasterAccounts));
+
+        function addLine() {
+            const options = masterAccounts.map(a =>
+                `<option value="${a.Value}">${a.Text}</option>`).join('');
+
+            const row = `
+                <tr>
+                    <td>
+                        <select name="Lines[${lineIndex}].AccountID" class="form-control" required>
+                            <option value="">Select Account</option>
+                            ${options}
+                        </select>
+                    </td>
+                    <td><input type="number" name="Lines[${lineIndex}].DebitedAmount" value="0" class="form-control" step="0.01" min="0" /></td>
+                    <td><input type="number" name="Lines[${lineIndex}].CreditedAmount" value="0" class="form-control" step="0.01" min="0" /></td>
+                    <td><input type="text" name="Lines[${lineIndex}].Comments" class="form-control" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">✖</button></td>
+                </tr>`;
+            document.getElementById("lineItems").insertAdjacentHTML('beforeend', row);
+            lineIndex++;
+        }
+    </script>
 }
+

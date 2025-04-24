@@ -21,9 +21,13 @@
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-sm-0">
-                    <li class="nav-item">
-                        @Html.ActionLink("Home", "Index", "Home", null, new { @class = "nav-link" })
-                    </li>
+                    @if (Session["UserName"] != null)
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("Home", "Index", "Home", null, new { @class = "nav-link" })
+                        </li>
+                    }
+
 
                     @if (Session["UserRole"]?.ToString() == "Admin")
                     {
@@ -47,19 +51,9 @@
                             @Html.ActionLink("Transactions", "Index", "TransactionHeaders", null, new { @class = "nav-link" })
                         </li>
                         <li class="nav-item">
-                            @Html.ActionLink("Transactions lines", "Index", "TransactionLines", null, new { @class = "nav-link" })
+                            @Html.ActionLink("Reports", "Index", "GenerateReport", null, new { @class = "nav-link" })
                         </li>
 
-                        <!-- ✅ Reports Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="reportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Reports
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="reportDropdown">
-                                <li>@Html.ActionLink("Trial Balance", "TrialBalance", "GenerateReport", null, new { @class = "dropdown-item" })</li>
-                                <li>@Html.ActionLink("Balance Sheet", "BalanceSheet", "GenerateReport", null, new { @class = "dropdown-item" })</li>
-                            </ul>
-                        </li>
 
                         <li class="nav-item">
                             @Html.ActionLink("Change Password", "Index", "ChangePassword", null, new { @class = "nav-link" })

@@ -1,50 +1,36 @@
 ﻿@model Group19_iFINANCEAPP.Models.MasterAccount
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Master Account Details";
 }
 
-<h2>Details</h2>
+<div class="container mt-4">
+    <div class="card shadow rounded">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">📄 Master Account Details</h4>
+        </div>
+        <div class="card-body">
 
-<div>
-    <h4>MasterAccount</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Account ID</dt>
+                <dd class="col-sm-8">@Model.ID</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
+                <dt class="col-sm-4">Account Name</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.OpeningAmount)
-        </dt>
+                <dt class="col-sm-4">Opening Amount</dt>
+                <dd class="col-sm-8">@Model.OpeningAmount</dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.OpeningAmount)
-        </dd>
+                <dt class="col-sm-4">Closing Amount</dt>
+                <dd class="col-sm-8">@Model.ClosingAmount</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ClosingAmount)
-        </dt>
+                <dt class="col-sm-4">Group ID</dt>
+                <dd class="col-sm-8">@Model.GroupID</dd>
+            </dl>
 
-        <dd>
-            @Html.DisplayFor(model => model.ClosingAmount)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountGroup.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountGroup.Name)
-        </dd>
-
-    </dl>
+        </div>
+        <div class="card-footer text-end">
+            @Html.ActionLink("← Back to List", "Index", null, new { @class = "btn btn-outline-secondary" })
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>

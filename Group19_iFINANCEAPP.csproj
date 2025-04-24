@@ -319,6 +319,7 @@
     <Content Include="Views\GenerateReport\BalanceSheet.cshtml" />
     <Content Include="Views\GenerateReport\ProfitLoss.cshtml" />
     <Content Include="Views\GenerateReport\CashFlow.cshtml" />
+    <Content Include="Views\GenerateReport\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

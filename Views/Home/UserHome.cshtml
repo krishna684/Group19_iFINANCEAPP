@@ -1,36 +1,65 @@
 ﻿@{
-    ViewBag.Title = "User Dashboard";
+    ViewBag.Title = "Welcome to iFINANCE";
+    string userName = Session["UserName"]?.ToString() ?? "User";
+    string userRole = Session["UserRole"]?.ToString() ?? "";
 }
 
-<h2 class="text-success">Welcome to iFINANCE</h2>
-<p class="lead">Manage your accounts and transactions efficiently.</p>
+<div class="container">
+    <div class="text-center my-5">
+        <h1 class="display-5 fw-bold text-primary">👋 Welcome, @userName!</h1>
+        <p class="lead text-muted">You are logged in as <strong>@userRole</strong>. Manage your financial data easily with iFINANCE.</p>
+    </div>
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card p-3 mb-3">
-            <h4>📁 Account Groups</h4>
-            <p>Manage your financial groups</p>
-            <a class="btn btn-outline-primary" href="@Url.Action("Index", "AccountGroups")">Go</a>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">📂 Account Groups</h5>
+                    <p class="card-text text-muted">Create and manage your income, assets, expenses and other financial groups.</p>
+                    <a href="@Url.Action("Index", "AccountGroups")" class="btn btn-primary">Manage Groups</a>
+                </div>
+            </div>
         </div>
 
-        <div class="card p-3 mb-3">
-            <h4>💳 Master Accounts</h4>
-            <p>Manage account balances</p>
-            <a class="btn btn-outline-primary" href="@Url.Action("Index", "MasterAccounts")">Go</a>
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-success">📘 Master Accounts</h5>
+                    <p class="card-text text-muted">Add or edit your financial accounts linked to account groups.</p>
+                    <a href="@Url.Action("Index", "MasterAccounts")" class="btn btn-success">Manage Accounts</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-warning">🔁 Transactions</h5>
+                    <p class="card-text text-muted">Record your debits and credits with double-entry accounting.</p>
+                    <a href="@Url.Action("Index", "TransactionHeaders")" class="btn btn-warning text-dark">View Transactions</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-6">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-info">📊 Reports</h5>
+                    <p class="card-text text-muted">Generate trial balance and balance sheet. Export reports as PDF.</p>
+                    <a href="@Url.Action("Index", "GenerateReport")" class="btn btn-info text-white">Generate Reports</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-6">
+            <div class="card h-100 shadow-sm border-dark">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-dark">🔒 Change Password</h5>
+                    <p class="card-text text-muted">Update your account password to keep your data secure.</p>
+                    <a href="@Url.Action("Index", "ChangePassword")" class="btn btn-dark">Change Password</a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card p-3 mb-3">
-            <h4>💸 Transactions</h4>
-            <p>Record double-entry transactions</p>
-            <a class="btn btn-outline-success" href="@Url.Action("Index", "TransactionHeaders")">Go</a>
-        </div>
-
-        <div class="card p-3 mb-3">
-            <h4>📊 Reports</h4>
-            <p>Generate financial reports</p>
-            <a class="btn btn-outline-info" href="@Url.Action("Index", "GenerateReport")">Go</a>
-        </div>
-    </div>
-</div>
+   

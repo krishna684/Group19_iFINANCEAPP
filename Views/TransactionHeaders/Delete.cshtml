@@ -1,48 +1,67 @@
 ﻿@model Group19_iFINANCEAPP.Models.TransactionHeader
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Delete Transaction";
 }
 
-<h2>Delete</h2>
-
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>TransactionHeader</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.NonAdminUser.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.NonAdminUser.Name)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+<div class="container mt-4">
+    <div class="card shadow border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">❌ Confirm Transaction Deletion</h4>
         </div>
-    }
+        <div class="card-body">
+
+            @if (TempData["DeleteError"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    @TempData["DeleteError"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <p class="lead">Are you sure you want to delete the following transaction?</p>
+
+            <dl class="row">
+                <dt class="col-sm-4">Transaction ID</dt>
+                <dd class="col-sm-8">@Model.ID</dd>
+
+                <dt class="col-sm-4">Date</dt>
+                <dd class="col-sm-8">@Model.Date.ToShortDateString()</dd>
+
+                <dt class="col-sm-4">Description</dt>
+                <dd class="col-sm-8">@Model.Description</dd>
+            </dl>
+
+            <h5 class="mt-4">Transaction Lines</h5>
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Account</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in Model.TransactionLine)
+                    {
+                        <tr>
+                            <td>@line.AccountID</td>
+                            <td>@(line.DebitedAmount > 0 ? $"{line.DebitedAmount:C}" : "")</td>
+                            <td>@(line.CreditedAmount > 0 ? $"{line.CreditedAmount:C}" : "")</td>
+                            <td>@line.Comments</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.ID" />
+                <button type="submit" class="btn btn-danger" title="Confirm and delete transaction">🗑️ Delete</button>
+                @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary ms-2", title = "Return to transaction list" })
+            }
+        </div>
+    </div>
 </div>

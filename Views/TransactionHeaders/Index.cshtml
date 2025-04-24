@@ -1,45 +1,37 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.TransactionHeader>
 
-@{
-    ViewBag.Title = "Index";
+<h2>📋 Transactions</h2>
+@Html.ActionLink("➕ Create Transaction", "Create", null, new { @class = "btn btn-primary mb-3" })
+
+@foreach (var trx in Model)
+{
+    <div class="card mb-3 shadow">
+        <div class="card-header bg-light">
+            <strong>@trx.ID</strong> – @trx.Date.ToShortDateString()
+            <br /><small class="text-muted">@trx.Description</small>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Account</th><th>Debit</th><th>Credit</th><th>Comment</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in trx.TransactionLine)
+                    {
+                        <tr>
+                            <td>@line.AccountID</td>
+                            <td>@(line.DebitedAmount > 0 ? $"{line.DebitedAmount:C}" : "")</td>
+                            <td>@(line.CreditedAmount > 0 ? $"{line.CreditedAmount:C}" : "")</td>
+                            <td>@line.Comments</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-end">
+            @Html.ActionLink("Edit", "Edit", new { id = trx.ID }, new { @class = "btn btn-warning btn-sm me-2" })
+            @Html.ActionLink("Delete", "Delete", new { id = trx.ID }, new { @class = "btn btn-danger btn-sm me-2" })
+            @Html.ActionLink("Details", "Details", new { id = trx.ID }, new { @class = "btn btn-info btn-sm" })
+        </div>
+    </div>
 }
-
-<h2>Index</h2>
-
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Date)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.NonAdminUser.Name)
-        </th>
-        <th></th>
-    </tr>
-
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Date)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.NonAdminUser.Name)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
-        </td>
-    </tr>
-}
-
-</table>

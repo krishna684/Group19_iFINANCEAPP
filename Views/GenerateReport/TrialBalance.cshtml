@@ -19,7 +19,11 @@
         </tr>
     }
 </table>
-<a class="btn btn-primary" href="@Url.Action("ExportTrialBalanceToPDF", "GenerateReport")">
+<div class="mt-3 text-end">
+    @Html.ActionLink("← Back to Report Selection", "Index", "GenerateReport", null, new { @class = "btn btn-outline-secondary" })
+</div>
+
+<a class="btn btn-primary" href="@Url.Action("TrialBalancePdf", "GenerateReport")">
     Export to PDF
 </a>
 

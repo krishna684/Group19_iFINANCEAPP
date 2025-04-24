@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.Mvc;
-using Group19_iFINANCEAPP.Models; // Use the namespace where your EF model is
+using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
@@ -14,32 +15,90 @@ namespace Group19_iFINANCEAPP.Controllers
             return View();
         }
 
-        // POST: Auth/Login
         [HttpPost]
         public ActionResult Login(string UserName, string Password)
         {
             var user = db.UserPassword.FirstOrDefault(u => u.UserName == UserName);
-
-            if (user != null && user.EncryptedPassword == Password) // Later, use hash check
+            if (user != null && user.EncryptedPassword == Password)
             {
                 Session["UserID"] = user.ID;
                 Session["UserName"] = user.UserName;
+                Session["UserRole"] = db.Administrator.Any(a => a.ID == user.ID) ? "Admin" : "User";
 
-                bool isAdmin = db.Administrator.Any(a => a.ID == user.ID);
-                Session["UserRole"] = isAdmin ? "Admin" : "User";
-
-                return RedirectToAction("Index", "Home"); // or any dashboard page
+                
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.Message = "Invalid username or password.";
             return View();
         }
 
-        // GET: Auth/Logout
         public ActionResult Logout()
         {
             Session.Clear();
-            return RedirectToAction("Login", "Auth");
+            return RedirectToAction("Login");
+        }
+
+        // GET: Auth/ForgotPassword
+        public ActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult ForgotPassword(string UserName, string Answer)
+        {
+            var user = db.UserPassword.FirstOrDefault(u => u.UserName == UserName);
+
+            if (user == null)
+            {
+                ViewBag.Message = "User not found.";
+                return View();
+            }
+
+            if (string.IsNullOrEmpty(Answer))
+            {
+                // Show security question
+                ViewBag.SecurityQuestion = user.SecurityQuestion;
+                ViewBag.UserName = user.UserName;
+                return View();
+            }
+
+            if (!string.Equals(user.SecurityAnswer, Answer, StringComparison.OrdinalIgnoreCase))
+            {
+                ViewBag.Message = "Incorrect answer.";
+                return View();
+            }
+
+            // Answer is correct → Redirect to reset
+            return RedirectToAction("ResetPassword", new { id = user.ID });
+        }
+
+        public ActionResult ResetPassword(string id)
+        {
+            ViewBag.UserID = id;
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult ResetPassword(string id, string NewPassword, string ConfirmPassword)
+        {
+            if (NewPassword != ConfirmPassword)
+            {
+                ViewBag.Message = "Passwords do not match.";
+                ViewBag.UserID = id;
+                return View();
+            }
+
+            var user = db.UserPassword.Find(id);
+            if (user != null)
+            {
+                user.EncryptedPassword = NewPassword;
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Password successfully updated. You can now log in.";
+            }
+
+            return RedirectToAction("Login");
         }
     }
 }

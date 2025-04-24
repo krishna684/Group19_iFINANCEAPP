@@ -23,6 +23,7 @@
         <AssociationConnector Association="Group19_iFINANCEDBModel.FK__Transacti__Trans__68487DD7" ManuallyRouted="false" />
         <AssociationConnector Association="Group19_iFINANCEDBModel.FK_AccountGroup_UserPassword" />
         <AssociationConnector Association="Group19_iFINANCEDBModel.FK_MasterAccount_UserPassword" />
+        <AssociationConnector Association="Group19_iFINANCEDBModel.FK_UserPassword_CreatedBy" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

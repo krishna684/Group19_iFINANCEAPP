@@ -91,6 +91,9 @@
           <Property Name="EncryptedPassword" Type="varchar" MaxLength="256" Nullable="false" />
           <Property Name="PasswordExpiryTime" Type="int" Nullable="false" />
           <Property Name="UserAccountExpiryDate" Type="date" Nullable="false" />
+          <Property Name="SecurityQuestion" Type="varchar" MaxLength="255" />
+          <Property Name="SecurityAnswer" Type="varchar" MaxLength="255" />
+          <Property Name="CreatedByID" Type="varchar" MaxLength="50" />
         </EntityType>
         <Association Name="FK__AccountGr__Paren__5BE2A6F2">
           <End Role="AccountGroup" Type="Self.AccountGroup" Multiplicity="0..1" />
@@ -212,6 +215,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_UserPassword_CreatedBy">
+          <End Role="UserPassword" Type="Self.UserPassword" Multiplicity="0..1" />
+          <End Role="UserPassword1" Type="Self.UserPassword" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserPassword">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="UserPassword1">
+              <PropertyRef Name="CreatedByID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="Group19_iFINANCEDBModelStoreContainer">
           <EntitySet Name="AccountCategory" EntityType="Self.AccountCategory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AccountGroup" EntityType="Self.AccountGroup" Schema="dbo" store:Type="Tables" />
@@ -257,6 +272,10 @@
           <AssociationSet Name="FK_MasterAccount_UserPassword" Association="Self.FK_MasterAccount_UserPassword">
             <End Role="UserPassword" EntitySet="UserPassword" />
             <End Role="MasterAccount" EntitySet="MasterAccount" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserPassword_CreatedBy" Association="Self.FK_UserPassword_CreatedBy">
+            <End Role="UserPassword" EntitySet="UserPassword" />
+            <End Role="UserPassword1" EntitySet="UserPassword" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -367,6 +386,8 @@
           <NavigationProperty Name="NonAdminUser" Relationship="Self.FK__NonAdminUser__ID__5535A963" FromRole="UserPassword" ToRole="NonAdminUser" />
           <NavigationProperty Name="AccountGroup" Relationship="Group19_iFINANCEDBModel.FK_AccountGroup_UserPassword" FromRole="UserPassword" ToRole="AccountGroup" />
           <NavigationProperty Name="MasterAccount" Relationship="Group19_iFINANCEDBModel.FK_MasterAccount_UserPassword" FromRole="UserPassword" ToRole="MasterAccount" />
+          <Property Name="SecurityQuestion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="SecurityAnswer" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
         </EntityType>
         <Association Name="FK__AccountGr__Paren__5BE2A6F2">
           <End Role="AccountGroup" Type="Self.AccountGroup" Multiplicity="0..1" />
@@ -510,6 +531,10 @@
             <End Role="UserPassword" EntitySet="UserPassword" />
             <End Role="MasterAccount" EntitySet="MasterAccount" />
           </AssociationSet>
+          <AssociationSet Name="FK_UserPassword_CreatedBy" Association="Group19_iFINANCEDBModel.FK_UserPassword_CreatedBy">
+            <End Role="UserPassword" EntitySet="UserPassword" />
+            <End Role="UserPassword1" EntitySet="UserPassword" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_AccountGroup_UserPassword">
           <End Type="Group19_iFINANCEDBModel.UserPassword" Role="UserPassword" Multiplicity="1" />
@@ -532,6 +557,18 @@
             </Principal>
             <Dependent Role="MasterAccount">
               <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserPassword_CreatedBy">
+          <End Type="Group19_iFINANCEDBModel.UserPassword" Role="UserPassword" Multiplicity="0..1" />
+          <End Type="Group19_iFINANCEDBModel.UserPassword" Role="UserPassword1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserPassword">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="UserPassword1">
+              <PropertyRef Name="CreatedByID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -629,6 +666,8 @@
           <EntitySetMapping Name="UserPassword">
             <EntityTypeMapping TypeName="Group19_iFINANCEDBModel.UserPassword">
               <MappingFragment StoreEntitySet="UserPassword">
+                <ScalarProperty Name="SecurityAnswer" ColumnName="SecurityAnswer" />
+                <ScalarProperty Name="SecurityQuestion" ColumnName="SecurityQuestion" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
                 <ScalarProperty Name="EncryptedPassword" ColumnName="EncryptedPassword" />

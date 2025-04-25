@@ -80,8 +80,8 @@ namespace Group19_iFINANCEAPP.Controllers
         private List<BalanceSheetEntry> GetBalanceSheetData(DateTime? from, DateTime? to)
         {
             string userId = Session["UserID"].ToString();
+
             var accounts = db.MasterAccount.Where(m => m.UserID == userId).ToList();
-            var groups = db.AccountGroup.Where(g => g.UserID == userId).ToList();
             var lines = db.TransactionLine
                           .Where(t => t.TransactionHeader.NonAdminUserID == userId)
                           .ToList();
@@ -89,23 +89,45 @@ namespace Group19_iFINANCEAPP.Controllers
             if (from.HasValue) lines = lines.Where(t => t.TransactionHeader.Date >= from.Value).ToList();
             if (to.HasValue) lines = lines.Where(t => t.TransactionHeader.Date <= to.Value).ToList();
 
-            var result = groups.Select(group =>
+            // Step 1: Get total debits and credits for each account
+            var accountBalances = accounts.Select(account => new
             {
-                var groupAccounts = accounts.Where(a => a.GroupID == group.ID).Select(a => a.ID).ToList();
-                decimal debit = lines.Where(l => groupAccounts.Contains(l.AccountID)).Sum(l => l.DebitedAmount);
-                decimal credit = lines.Where(l => groupAccounts.Contains(l.AccountID)).Sum(l => l.CreditedAmount);
-                decimal net = debit - credit;
-
-                return new BalanceSheetEntry
-                {
-                    Category = group.Name,
-                    Type = group.ElementType,
-                    Amount = net
-                };
+                AccountName = account.Name,
+                GroupType = account.AccountGroup.ElementType, // Asset, Liability, Income, Expense
+                Debit = lines.Where(l => l.AccountID == account.ID).Sum(l => l.DebitedAmount),
+                Credit = lines.Where(l => l.AccountID == account.ID).Sum(l => l.CreditedAmount)
             }).ToList();
+
+            // Step 2: Aggregate totals based on group type
+            decimal totalAssets = accountBalances
+                                    .Where(a => a.GroupType == "Asset")
+                                    .Sum(a => a.Debit - a.Credit);
+
+            decimal totalLiabilities = accountBalances
+                                        .Where(a => a.GroupType == "Liability")
+                                        .Sum(a => a.Credit - a.Debit);
+
+            decimal totalIncome = accountBalances
+                                    .Where(a => a.GroupType == "Income")
+                                    .Sum(a => a.Credit - a.Debit);
+
+            decimal totalExpenses = accountBalances
+                                    .Where(a => a.GroupType == "Expense")
+                                    .Sum(a => a.Debit - a.Credit);
+
+            decimal netProfitLoss = totalIncome - totalExpenses;
+
+            // Step 3: Build Balance Sheet entries
+            var result = new List<BalanceSheetEntry>
+    {
+        new BalanceSheetEntry { Category = "Total Assets", Type = "Asset", Amount = totalAssets },
+        new BalanceSheetEntry { Category = "Total Liabilities", Type = "Liability", Amount = totalLiabilities },
+        new BalanceSheetEntry { Category = "Net Profit/Loss", Type = "Income-Expense", Amount = netProfitLoss },
+    };
 
             return result;
         }
+
     }
 
     public class TrialBalanceEntry

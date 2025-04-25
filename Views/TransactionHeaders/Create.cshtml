@@ -33,11 +33,11 @@
             </div>
             <div class="form-group mb-2">
                 @Html.LabelFor(m => m.Date)
-                @Html.TextBoxFor(m => m.Date, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                @Html.TextBoxFor(m => m.Date, "{0:yyyy-MM-dd}", new { @class = "form-select", type = "date" })
             </div>
             <div class="form-group mb-2">
                 @Html.LabelFor(m => m.Description)
-                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3 })
+                @Html.TextAreaFor(m => m.Description, new { @class = "form-select", rows = 3 })
             </div>
         </div>
     </div>
@@ -45,8 +45,8 @@
     <div class="card shadow mb-4">
         <div class="card-header bg-secondary text-white">Transaction Lines</div>
         <div class="card-body">
-            <table class="table table-bordered" id="linesTable">
-                <thead class="table-light">
+            <table class="table table-dark table-striped table-hover rounded shadow-sm overflow-hidden">
+                <thead class="table-light text-dark">
                     <tr>
                         <th>Account</th>
                         <th>Debit</th>
@@ -79,7 +79,7 @@
             const row = `
                 <tr>
                     <td>
-                        <select name="Lines[${lineIndex}].AccountID" class="form-control" required>
+                        <select name="Lines[${lineIndex}].AccountID" class="form-select" required>
                             <option value="">Select Account</option>
                             ${options}
                         </select>

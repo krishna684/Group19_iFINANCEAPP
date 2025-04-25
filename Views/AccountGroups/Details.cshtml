@@ -9,20 +9,20 @@
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">📁 Account Group Details</h4>
         </div>
-        <div class="card-body">
-
+        <div class="card-body bg-dark text-white">
+            <!-- Add bg-dark for contrast -->
             <dl class="row mb-0">
                 <dt class="col-sm-4">Group ID</dt>
-                <dd class="col-sm-8 text-muted">@Model.ID</dd>
+                <dd class="col-sm-8 text-white">@Model.ID</dd>
 
                 <dt class="col-sm-4">Group Name</dt>
-                <dd class="col-sm-8 text-muted">@Model.Name</dd>
+                <dd class="col-sm-8 text-white">@Model.Name</dd>
 
                 <dt class="col-sm-4">Group Type</dt>
-                <dd class="col-sm-8 text-muted">@Model.ElementType</dd>
+                <dd class="col-sm-8 text-white">@Model.ElementType</dd>
 
                 <dt class="col-sm-4">Parent Group</dt>
-                <dd class="col-sm-8 text-muted">
+                <dd class="col-sm-8 text-white">
                     @if (!string.IsNullOrEmpty(Model.ParentGroupID))
                     {
                         @Model.ParentGroupID
@@ -33,7 +33,6 @@
                     }
                 </dd>
             </dl>
-
         </div>
         <div class="card-footer text-end">
             @Html.ActionLink("← Back to List", "Index", null, new { @class = "btn btn-outline-secondary" })

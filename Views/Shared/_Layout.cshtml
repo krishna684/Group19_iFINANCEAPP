@@ -72,7 +72,7 @@
             }
 
         /* Cards and forms */
-        .card, .form-control, .form-select, .table, .btn {
+        .card, .form-control, .form-select, .btn {
             background-color: var(--card-bg);
             color: var(--color);
             border: 1px solid var(--border-color);
@@ -84,7 +84,7 @@
         }
 
         .table thead {
-            background-color: rgba(255, 255, 255, 0.08);
+            background-color: #000;
         }
 
         .form-control::placeholder,
@@ -177,6 +177,32 @@
             gap: 1rem;
             margin-top: 1rem;
         }
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .body-content {
+            flex: 1 0 auto;
+            padding-bottom: 20px;
+        }
+
+        footer {
+            
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+
 
 
     </style>
@@ -247,7 +273,7 @@
         @RenderBody()
         <hr />
         <footer class="text-center text-muted small">
-            <p>&copy; @DateTime.Now.Year - iFINANCE | Group 19</p>
+            <p style="color:#ffffff">&copy; @DateTime.Now.Year - iFINANCE | Group 19</p>
         </footer>
     </div>
 

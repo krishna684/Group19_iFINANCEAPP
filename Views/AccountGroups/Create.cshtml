@@ -53,7 +53,7 @@
                     new SelectList(new[] { "Assets", "Liabilities", "Income", "Expenses" }),
                     "Select Type", new
                          {
-                        @class = "form-control",
+                        @class = "form-select",
                         title = "Select the financial category this group belongs to."
                     })
                 @Html.ValidationMessageFor(model => model.ElementType, "", new { @class = "text-danger" })
@@ -65,13 +65,13 @@
             <div class="col-md-10">
                 @Html.DropDownList("ParentGroupID", (SelectList)ViewBag.ParentGroupID, "None", new
                 {
-                    @class = "form-control",
+                    @class = "form-select",
                     title = "Optional: Select a parent group if this is a sub-group. Choose 'None' to create a top-level group."
                 })
                 @Html.ValidationMessageFor(model => model.ParentGroupID, "", new { @class = "text-danger" })
             </div>
         </div>
-
+        <br />
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Create" class="btn btn-primary" title="Click to create the new account group." />
@@ -79,7 +79,7 @@
         </div>
     </div>
 }
-
+<br />
 <div>
     @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default", title = "Return to the group list." })
 </div>

@@ -50,7 +50,7 @@
                         new SelectList(new[] { "Assets", "Liabilities", "Income", "Expenses" }, Model.ElementType),
                         "Select Type", new
                              {
-                            @class = "form-control",
+                            @class = "form-select",
                             title = "Select the financial category this group belongs to."
                         })
                     @Html.ValidationMessageFor(model => model.ElementType)
@@ -60,7 +60,7 @@
                     @Html.LabelFor(model => model.ParentGroupID)
                     @Html.DropDownList("ParentGroupID", (SelectList)ViewBag.ParentGroupID, "None", new
                     {
-                        @class = "form-control",
+                        @class = "form-select",
                         title = "Optional: select parent group if this is a sub-group."
                     })
                     @Html.ValidationMessageFor(model => model.ParentGroupID)

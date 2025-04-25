@@ -81,13 +81,13 @@
             <div class="col-md-10">
                 @Html.DropDownList("GroupID", (SelectList)ViewBag.GroupID, "Select Group", new
                 {
-                    @class = "form-control",
+                    @class = "form-select",
                     title = "Select the group this account belongs to (e.g., Assets, Expenses)."
                 })
                 @Html.ValidationMessageFor(model => model.GroupID, "", new { @class = "text-danger" })
             </div>
         </div>
-
+        <br />
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Create" class="btn btn-primary" title="Click to save this master account." />

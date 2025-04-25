@@ -1,37 +1,79 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.TransactionHeader>
 
-<h2>📋 Transactions</h2>
-@Html.ActionLink("➕ Create Transaction", "Create", null, new { @class = "btn btn-primary mb-3" })
+    <h2 class="text-light mb-4">📋 Transactions</h2>
+    @Html.ActionLink("➕ Create Transaction", "Create", null, new { @class = "btn btn-outline-primary mb-3" })
 
-@foreach (var trx in Model)
-{
-    <div class="card mb-3 shadow">
-        <div class="card-header bg-light">
-            <strong>@trx.ID</strong> – @trx.Date.ToShortDateString()
-            <br /><small class="text-muted">@trx.Description</small>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-bordered table-sm mb-0">
-                <thead class="table-light">
-                    <tr><th>Account</th><th>Debit</th><th>Credit</th><th>Comment</th></tr>
-                </thead>
-                <tbody>
-                    @foreach (var line in trx.TransactionLine)
-                    {
+    <style>
+        .trx-table th {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .trx-table tbody tr:nth-child(odd) {
+            background-color: #27292C;
+        }
+
+        .trx-table tbody tr:nth-child(even) {
+            background-color: #3a3d42;
+        }
+
+        .trx-table tbody tr:hover {
+            background-color: #3a3d42;
+        }
+
+        .trx-card {
+            background-color: #19192B;
+            border-radius: 12px;
+        }
+
+        .trx-card-header,
+        .trx-card-footer {
+            background-color: #2c3034;
+            color: #fff;
+            border-radius: 0 0 12px 12px;
+        }
+        .text-muted {
+            color: #fff;
+        }
+        .text-muted {
+            color: #fff !important;
+        }
+    </style>
+
+    @foreach (var trx in Model)
+    {
+        <div class="card mb-4 shadow border-0 trx-card">
+            <div class="card-header trx-card-header" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <strong>@trx.ID</strong> – @trx.Date.ToShortDateString()
+                <br /><small class="text-muted">@trx.Description</small>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-dark table-striped table-hover rounded shadow-sm overflow-hidden">
+                    <thead class="table-light text-dark">
                         <tr>
-                            <td>@line.AccountID</td>
-                            <td>@(line.DebitedAmount > 0 ? $"{line.DebitedAmount:C}" : "")</td>
-                            <td>@(line.CreditedAmount > 0 ? $"{line.CreditedAmount:C}" : "")</td>
-                            <td>@line.Comments</td>
+                            <th>Account</th>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                            <th>Comment</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in trx.TransactionLine)
+                        {
+                            <tr>
+                                <td>@line.AccountID</td>
+                                <td>@(line.DebitedAmount > 0 ? $"{line.DebitedAmount:C}" : "")</td>
+                                <td>@(line.CreditedAmount > 0 ? $"{line.CreditedAmount:C}" : "")</td>
+                                <td>@line.Comments</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-end trx-card-footer">
+                @Html.ActionLink("✏️ Edit", "Edit", new { id = trx.ID }, new { @class = "btn btn-sm btn-outline-warning me-2" })
+                @Html.ActionLink("🗑️ Delete", "Delete", new { id = trx.ID }, new { @class = "btn btn-sm btn-outline-danger me-2" })
+                @Html.ActionLink("ℹ️ Details", "Details", new { id = trx.ID }, new { @class = "btn btn-sm btn-outline-info" })
+            </div>
         </div>
-        <div class="card-footer text-end">
-            @Html.ActionLink("Edit", "Edit", new { id = trx.ID }, new { @class = "btn btn-warning btn-sm me-2" })
-            @Html.ActionLink("Delete", "Delete", new { id = trx.ID }, new { @class = "btn btn-danger btn-sm me-2" })
-            @Html.ActionLink("Details", "Details", new { id = trx.ID }, new { @class = "btn btn-info btn-sm" })
-        </div>
-    </div>
-}
+    }

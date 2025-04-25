@@ -25,7 +25,7 @@ namespace Group19_iFINANCEAPP.Controllers
                 Session["UserName"] = user.UserName;
                 Session["UserRole"] = db.Administrator.Any(a => a.ID == user.ID) ? "Admin" : "User";
 
-                TempData["SuccessMessage"] = $"Welcome back, {user.UserName}!";
+               
                 return RedirectToAction("Index", "Home");
             }
 

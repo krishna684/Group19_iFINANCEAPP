@@ -4,62 +4,73 @@
     string userRole = Session["UserRole"]?.ToString() ?? "";
 }
 
-<div class="container">
-    <div class="text-center my-5">
-        <h1 class="display-5 fw-bold text-primary">👋 Welcome, @userName!</h1>
-        <p class="lead text-muted">You are logged in as <strong>@userRole</strong>. Manage your financial data easily with iFINANCE.</p>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">👋 Welcome, @userName!</h1>
+        <p class="lead text-light">Logged in as <strong>@userRole</strong>. Manage your finances effortlessly with iFINANCE.</p>
     </div>
 
     <div class="row g-4">
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-primary">
+        <!-- Feature Cards -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow border-primary border-1 rounded-4 bg-dark text-white">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-primary">📂 Account Groups</h5>
-                    <p class="card-text text-muted">Create and manage your income, assets, expenses and other financial groups.</p>
-                    <a href="@Url.Action("Index", "AccountGroups")" class="btn btn-primary">Manage Groups</a>
+                    <h4 class="card-title text-primary">📂 Account Groups</h4>
+                    <p class="card-text">Organize your income, assets, expenses, and more.</p>
+                    <a href="@Url.Action("Index", "AccountGroups")" class="btn btn-outline-primary">Manage Groups</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-success">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow border-success border-1 rounded-4 bg-dark text-white">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-success">📘 Master Accounts</h5>
-                    <p class="card-text text-muted">Add or edit your financial accounts linked to account groups.</p>
-                    <a href="@Url.Action("Index", "MasterAccounts")" class="btn btn-success">Manage Accounts</a>
+                    <h4 class="card-title text-success">📘 Master Accounts</h4>
+                    <p class="card-text">Manage your financial accounts linked with groups.</p>
+                    <a href="@Url.Action("Index", "MasterAccounts")" class="btn btn-outline-success">Manage Accounts</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-warning">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow border-warning border-1 rounded-4 bg-dark text-white">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-warning">🔁 Transactions</h5>
-                    <p class="card-text text-muted">Record your debits and credits with double-entry accounting.</p>
-                    <a href="@Url.Action("Index", "TransactionHeaders")" class="btn btn-warning text-dark">View Transactions</a>
+                    <h4 class="card-title text-warning">🔁 Transactions</h4>
+                    <p class="card-text">Record and view debits and credits seamlessly.</p>
+                    <a href="@Url.Action("Index", "TransactionHeaders")" class="btn btn-outline-warning">View Transactions</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-6">
-            <div class="card h-100 shadow-sm border-info">
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card h-100 shadow border-info border-1 rounded-4 bg-dark text-white">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-info">📊 Reports</h5>
-                    <p class="card-text text-muted">Generate trial balance and balance sheet. Export reports as PDF.</p>
-                    <a href="@Url.Action("Index", "GenerateReport")" class="btn btn-info text-white">Generate Reports</a>
+                    <h4 class="card-title text-info">📊 Reports</h4>
+                    <p class="card-text">Generate and export financial reports.</p>
+                    <a href="@Url.Action("Index", "GenerateReport")" class="btn btn-outline-info">Generate Reports</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-6">
-            <div class="card h-100 shadow-sm border-dark">
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card h-100 shadow border-light border-1 rounded-4 bg-dark text-white">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-dark">🔒 Change Password</h5>
-                    <p class="card-text text-muted">Update your account password to keep your data secure.</p>
-                    <a href="@Url.Action("Index", "ChangePassword")" class="btn btn-dark">Change Password</a>
+                    <h4 class="card-title text-light">🔒 Change Password</h4>
+                    <p class="card-text">Keep your account secure by updating your password.</p>
+                    <a href="@Url.Action("Index", "ChangePassword")" class="btn btn-outline-light">Change Password</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-   
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 32px rgba(255, 255, 255, 0.15);
+        }
+</style>

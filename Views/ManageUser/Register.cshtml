@@ -26,7 +26,6 @@
                 </div>
             </div>
 
-
             <div class="col-md-6">
                 <label class="form-label">Role</label>
                 <select name="Role" class="form-select" id="roleSelector" required>
@@ -51,6 +50,27 @@
                 <input type="text" name="Address" class="form-control" />
             </div>
 
+            <!-- ✅ Security Question -->
+            <div class="col-md-6">
+                <label class="form-label">Security Question</label>
+                <select name="SecurityQuestion" class="form-select" required>
+                    <option value="">-- Select a question --</option>
+                    <option value="What is your favorite color?">What is your favorite color?</option>
+                    <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                    <option value="What is the name of your hometown?">What is the name of your hometown?</option>
+                    <option value="What is your favorite food?">What is your favorite food?</option>
+                </select>
+            </div>
+
+
+            <!-- ✅ Security Answer -->
+            <div class="col-md-6">
+                <label class="form-label">Security Answer</label>
+                <input type="text" name="SecurityAnswer" class="form-control" required />
+            </div>
+
+            <!-- Admin-only fields -->
             <div class="admin-only" style="display:none;">
                 <div class="col-md-6">
                     <label class="form-label">Date Hired</label>
@@ -77,7 +97,6 @@
 
 @section Scripts {
     <script>
-        
         // Role-based admin fields toggle
         document.getElementById("roleSelector").addEventListener("change", function () {
             const adminFields = document.querySelector(".admin-only");
@@ -93,4 +112,3 @@
         });
     </script>
 }
-

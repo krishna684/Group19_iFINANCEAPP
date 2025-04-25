@@ -1,17 +1,71 @@
 ﻿@{
     ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="text-primary">Welcome Admin</h2>
-<p class="lead">Use the menu to register users and manage their access.</p>
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-light">👨‍💼 Admin Dashboard</h1>
+        <p class="lead text-secondary">Welcome! Use the tools below to manage users and system access.</p>
+    </div>
 
-<div class="card mt-3 p-3">
-    <h4>👤 Register User</h4>
-    <p>Admins can register new users or other admins.</p>
-    <a class="btn btn-dark" href="@Url.Action("Register", "ManageUser")">Register Users</a>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card glass-card text-center p-4 mb-4">
+                <h4 class="mb-3">👥 Register User</h4>
+                <p class="text-muted">Admins can register new users or other admins.</p>
+                <a class="btn btn-outline-light" href="@Url.Action("Register", "ManageUser")">➕ Register Users</a>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card glass-card text-center p-4 mb-4">
+                <h4 class="mb-3">🔧 Manage Users</h4>
+                <p class="text-muted">View, edit, or manage all registered users and admins.</p>
+                <a class="btn btn-outline-light" href="@Url.Action("Index", "AdminUsers")">🛠️ Manage Users</a>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="card mt-3 p-3">
-    <h4>👤 User Management</h4>
-    <p>Admins can view or edit users or other admins.</p>
-    <a class="btn btn-dark" href="@Url.Action("Index", "AdminUsers")">Manage Users</a>
-</div>
+
+<style>
+    :root {
+        --background: #1a1a2e;
+        --color: #ffffff;
+        --primary-color: #0f3460;
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--color);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .glass-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+    }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .btn-outline-light {
+        border-color: var(--border-color);
+        color: var(--color);
+    }
+
+        .btn-outline-light:hover {
+            background-color: #ffffff;
+            color: var(--primary-color);
+        }
+
+    .text-muted {
+        color: #ccc;
+    }
+</style>

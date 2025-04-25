@@ -22,6 +22,7 @@ namespace Group19_iFINANCEAPP.Controllers
         [HttpPost]
         public ActionResult Register(string ID, string UserName, string Password, string Role,
                                      string Name, string Address, string Email,
+                                     string SecurityQuestion, string SecurityAnswer,
                                      DateTime? DateHired, DateTime? DateFinished)
         {
             if (Session["UserRole"]?.ToString() != "Admin")
@@ -38,9 +39,11 @@ namespace Group19_iFINANCEAPP.Controllers
             {
                 ID = ID,
                 UserName = UserName,
-                EncryptedPassword = Password, // Add hash later
+                EncryptedPassword = Password, // TODO: Add hash later
                 PasswordExpiryTime = 90,
-                UserAccountExpiryDate = new DateTime(2026, 1, 1)
+                UserAccountExpiryDate = new DateTime(2026, 1, 1),
+                SecurityQuestion = SecurityQuestion,
+                SecurityAnswer = SecurityAnswer
             });
 
             // 2. Add to either Admin or NonAdmin

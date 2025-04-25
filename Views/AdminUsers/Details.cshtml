@@ -4,88 +4,90 @@
     ViewBag.Title = "User Details";
 }
 
-<h2 class="mb-4">User Details</h2>
+<h2 class="mb-4 text-light">User Details</h2>
 
-<div class="card shadow-sm border-0 rounded">
+<div class="card shadow-sm border-0 rounded bg-dark text-light">
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-6">
-                <strong>ID:</strong>
-                <div class="text-muted">@Model.ID</div>
+                <strong class="text-info">ID:</strong>
+                <div class="text-white">@Model.ID</div>
             </div>
             <div class="col-md-6">
-                <strong>Username:</strong>
-                <div class="text-muted">@Model.UserName</div>
+                <strong class="text-info">Username:</strong>
+                <div class="text-white">@Model.UserName</div>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <strong>Role:</strong>
-                <div class="badge bg-@(Model.Administrator != null ? "primary" : "secondary")">
-                    @(Model.Administrator != null ? "Admin" : "User")
+                <strong class="text-info">Role:</strong>
+                <div>
+                    <span class="badge bg-@(Model.Administrator != null ? "primary" : "secondary")">
+                        @(Model.Administrator != null ? "Admin" : "User")
+                    </span>
                 </div>
             </div>
             <div class="col-md-6">
-                <strong>Password Expiry:</strong>
-                <div class="text-muted">@Model.PasswordExpiryTime days</div>
+                <strong class="text-info">Password Expiry:</strong>
+                <div class="text-white">@Model.PasswordExpiryTime days</div>
             </div>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-6">
-                <strong>Account Expiry:</strong>
-                <div class="text-muted">@Model.UserAccountExpiryDate.ToShortDateString()</div>
+                <strong class="text-info">Account Expiry:</strong>
+                <div class="text-white">@Model.UserAccountExpiryDate.ToShortDateString()</div>
             </div>
         </div>
 
         @if (Model.NonAdminUser != null)
         {
-            <h5 class="mt-4">Non-Admin Details</h5>
-            <hr />
+            <h5 class="mt-4 text-warning">Non-Admin Details</h5>
+            <hr class="border-secondary" />
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <strong>Full Name:</strong>
-                    <div class="text-muted">@Model.NonAdminUser.Name</div>
+                    <strong class="text-info">Full Name:</strong>
+                    <div class="text-white">@Model.NonAdminUser.Name</div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Email:</strong>
-                    <div class="text-muted">@Model.NonAdminUser.Email</div>
+                    <strong class="text-info">Email:</strong>
+                    <div class="text-white">@Model.NonAdminUser.Email</div>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-12">
-                    <strong>Address:</strong>
-                    <div class="text-muted">@Model.NonAdminUser.Address</div>
+                    <strong class="text-info">Address:</strong>
+                    <div class="text-white">@Model.NonAdminUser.Address</div>
                 </div>
             </div>
         }
 
         @if (Model.Administrator != null)
         {
-            <h5 class="mt-4">Admin Details</h5>
-            <hr />
+            <h5 class="mt-4 text-warning">Admin Details</h5>
+            <hr class="border-secondary" />
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <strong>Name:</strong>
-                    <div class="text-muted">@Model.Administrator.Name</div>
+                    <strong class="text-info">Name:</strong>
+                    <div class="text-white">@Model.Administrator.Name</div>
                 </div>
                 <div class="col-md-6">
-                    <strong>Date Hired:</strong>
-                    <div class="text-muted">@Model.Administrator.DateHired.ToShortDateString()</div>
+                    <strong class="text-info">Date Hired:</strong>
+                    <div class="text-white">@Model.Administrator.DateHired.ToShortDateString()</div>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <strong>Date Finished:</strong>
-                    <div class="text-muted">@Model.Administrator.DateFinished?.ToShortDateString() ?? "N/A"</div>
+                    <strong class="text-info">Date Finished:</strong>
+                    <div class="text-white">@Model.Administrator.DateFinished?.ToShortDateString() ?? "N/A"</div>
                 </div>
             </div>
         }
 
         <div class="mt-4">
             @Html.ActionLink("Edit", "Edit", new { id = Model.ID }, new { @class = "btn btn-success me-2" })
-            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-outline-secondary" })
+            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-outline-light" })
         </div>
     </div>
 </div>

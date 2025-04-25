@@ -4,15 +4,13 @@
     ViewBag.Title = "All Users";
 }
 
-<h2 class="mb-4">All Registered Users</h2>
+<h2 class="mb-4 text-light">All Registered Users</h2>
 
-<!-- Search Bar -->
 <div class="form-group mb-4">
-    <label for="searchBox" class="form-label">Search Users by Username</label>
-    <input type="text" id="searchBox" class="form-control shadow-sm" placeholder="Enter username..." />
+    <label for="searchBox" class="form-label text-light">Search Users by Username</label>
+    <input type="text" id="searchBox" class="form-control bg-dark text-light border-secondary" placeholder="Enter username..." />
 </div>
 
-<!-- AJAX Results -->
 <div id="userResults">
     @Html.Partial("_UserTable", Model)
 </div>

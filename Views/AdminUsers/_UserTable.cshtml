@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.UserPassword>
 
-<table class="table table-hover table-bordered shadow-sm bg-white rounded">
-    <thead class="table-light">
+<table class="table table-dark table-striped table-hover rounded shadow-sm overflow-hidden">
+    <thead class="table-light text-dark">
         <tr>
             <th>ID</th>
             <th>UserName</th>
@@ -18,13 +18,17 @@
             <tr>
                 <td>@user.ID</td>
                 <td>@user.UserName</td>
-                <td>@(isAdmin ? "Admin" : "User")</td>
+                <td>
+                    <span class="badge bg-@(isAdmin ? "info" : "secondary")">@((isAdmin ? "Admin" : "User"))</span>
+                </td>
                 <td>@user.PasswordExpiryTime days</td>
                 <td>@user.UserAccountExpiryDate.ToShortDateString()</td>
                 <td>
-                    @Html.ActionLink("Details", "Details", new { id = user.ID }, new { @class = "btn btn-sm btn-info me-1" }) |
-                    @Html.ActionLink("Edit", "Edit", new { id = user.ID }, new { @class = "btn btn-sm btn-warning me-1" }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = user.ID }, new { @class = "btn btn-sm btn-danger" })
+                    <div class="btn-group btn-group-sm">
+                        @Html.ActionLink("Details", "Details", new { id = user.ID }, new { @class = "btn btn-outline-info" })
+                        @Html.ActionLink("Edit", "Edit", new { id = user.ID }, new { @class = "btn btn-outline-warning" })
+                        @Html.ActionLink("Delete", "Delete", new { id = user.ID }, new { @class = "btn btn-outline-danger" })
+                    </div>
                 </td>
             </tr>
         }

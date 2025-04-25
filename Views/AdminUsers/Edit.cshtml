@@ -4,35 +4,62 @@
     ViewBag.Title = "Edit User";
 }
 
-<h2>Edit User</h2>
+<h2 class="mb-4">Edit User</h2>
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.ID)
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.UserName)
-        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+    <!-- Username -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.UserName, htmlAttributes: new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @readonly = "readonly" })
+        <!-- Prevent editing of username if needed -->
     </div>
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EncryptedPassword)
-        @Html.TextBoxFor(m => m.EncryptedPassword, new { @class = "form-control" })
+    <!-- Password (Encrypted) -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.EncryptedPassword, htmlAttributes: new { @class = "form-label" })
+
+        <div class="input-group">
+            @Html.TextBoxFor(m => m.EncryptedPassword, new { @class = "form-control", @type = "password", @id = "passwordBox" })
+            <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                Show
+            </button>
+        </div>
+
+        <small class="text-muted">* Encrypted password — toggle visibility if needed</small>
     </div>
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.PasswordExpiryTime)
-        @Html.TextBoxFor(m => m.PasswordExpiryTime, new { @class = "form-control" })
+
+    <!-- Password Expiry Time -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.PasswordExpiryTime, htmlAttributes: new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.PasswordExpiryTime, new { @class = "form-control", type = "number", min = "0" })
     </div>
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.UserAccountExpiryDate)
-        @Html.TextBoxFor(m => m.UserAccountExpiryDate, new { @class = "form-control", type = "date" })
-    </div>
+    <!-- Account Expiry Date -->
+<div class="form-group mb-4">
+    @Html.LabelFor(m => m.UserAccountExpiryDate, htmlAttributes: new { @class = "form-label" })
+    @Html.TextBoxFor(m => m.UserAccountExpiryDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
 
-    <div class="form-group mt-3">
-        <button type="submit" class="btn btn-primary">Save</button>
-        @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary ms-2" })
+</div>
+
+    <!-- Submit + Back -->
+    <div class="form-group">
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-outline-secondary ms-2" })
     </div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const pwdBox = document.getElementById("passwordBox");
+            const type = pwdBox.getAttribute("type") === "password" ? "text" : "password";
+            pwdBox.setAttribute("type", type);
+            this.textContent = type === "password" ? "Show" : "Hide";
+        });
+    </script>
 }

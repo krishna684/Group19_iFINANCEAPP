@@ -1,33 +1,32 @@
 ﻿@model IEnumerable<Group19_iFINANCEAPP.Models.UserPassword>
+
 @{
     ViewBag.Title = "All Users";
 }
-<h2>All Registered Users</h2>
 
-<table class="table table-striped">
-    <tr>
-        <th>ID</th>
-        <th>UserName</th>
-        <th>Role</th>
-        <th>Password Expiry</th>
-        <th>Account Expiry</th>
-        <th>Actions</th>
-    </tr>
+<h2 class="mb-4">All Registered Users</h2>
 
-    @foreach (var user in Model)
-    {
-        var isAdmin = user.Administrator != null;
-        <tr>
-            <td>@user.ID</td>
-            <td>@user.UserName</td>
-            <td>@(isAdmin ? "Admin" : "User")</td>
-            <td>@user.PasswordExpiryTime days</td>
-            <td>@user.UserAccountExpiryDate.ToShortDateString()</td>
-            <td>
-                @Html.ActionLink("Details", "Details", new { id = user.ID }) |
-                @Html.ActionLink("Edit", "Edit", new { id = user.ID }) |
-                @Html.ActionLink("Delete", "Delete", new { id = user.ID })
-            </td>
-        </tr>
-    }
-</table>
+<!-- Search Bar -->
+<div class="form-group mb-4">
+    <label for="searchBox" class="form-label">Search Users by Username</label>
+    <input type="text" id="searchBox" class="form-control shadow-sm" placeholder="Enter username..." />
+</div>
+
+<!-- AJAX Results -->
+<div id="userResults">
+    @Html.Partial("_UserTable", Model)
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchBox").on("keyup", function () {
+                var query = $(this).val();
+                $.get("@Url.Action("Search", "AdminUsers")", { searchString: query }, function (data) {
+                    $("#userResults").html(data);
+                });
+            });
+        });
+    </script>
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using System.Data.Entity;
 using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
@@ -17,12 +18,41 @@ namespace Group19_iFINANCEAPP.Controllers
         }
 
         // GET: AdminUsers
-        public ActionResult Index()
+        public ActionResult Index(string searchString)
         {
-            if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (Session["UserID"] == null || !IsAdmin())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
-            var users = db.UserPassword.ToList();
-            return View(users);
+            ViewBag.CurrentFilter = searchString;
+
+            var users = db.UserPassword.AsQueryable();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                users = users.Where(u => u.UserName.Contains(searchString));
+            }
+
+            return View(users.ToList());
+        }
+
+        // GET: AdminUsers/Search (AJAX)
+        public ActionResult Search(string searchString)
+        {
+            if (Session["UserID"] == null || !IsAdmin())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
+            var users = db.UserPassword.AsQueryable();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                users = users.Where(u => u.UserName.Contains(searchString));
+            }
+
+            return PartialView("_UserTable", users.ToList());
         }
 
         // GET: AdminUsers/Details/5
@@ -31,7 +61,11 @@ namespace Group19_iFINANCEAPP.Controllers
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var user = db.UserPassword.Find(id);
+            var user = db.UserPassword
+                         .Include(u => u.Administrator)
+                         .Include(u => u.NonAdminUser)
+                         .FirstOrDefault(u => u.ID == id);
+
             if (user == null) return HttpNotFound();
 
             return View(user);
@@ -43,13 +77,17 @@ namespace Group19_iFINANCEAPP.Controllers
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var user = db.UserPassword.Find(id);
+            var user = db.UserPassword
+                         .Include(u => u.Administrator)
+                         .Include(u => u.NonAdminUser)
+                         .FirstOrDefault(u => u.ID == id);
+
             if (user == null) return HttpNotFound();
 
             return View(user);
         }
 
-        // ✅ POST: AdminUsers/Edit/5
+        // POST: AdminUsers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,UserName,EncryptedPassword,PasswordExpiryTime,UserAccountExpiryDate")] UserPassword user)
@@ -97,7 +135,6 @@ namespace Group19_iFINANCEAPP.Controllers
         public ActionResult DeleteConfirmed(string id)
         {
             var user = db.UserPassword.Find(id);
-
             if (!IsAdmin() || user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 

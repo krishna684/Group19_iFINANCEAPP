@@ -322,6 +322,7 @@
     <Content Include="Views\GenerateReport\Index.cshtml" />
     <Content Include="Views\Auth\ForgotPassword.cshtml" />
     <Content Include="Views\Auth\ResetPassword.cshtml" />
+    <Content Include="Views\AdminUsers\_UserTable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

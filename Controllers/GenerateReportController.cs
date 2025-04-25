@@ -100,11 +100,11 @@ namespace Group19_iFINANCEAPP.Controllers
 
             // Step 2: Aggregate totals based on group type
             decimal totalAssets = accountBalances
-                                    .Where(a => a.GroupType == "Asset")
+                                    .Where(a => a.GroupType == "Assets")
                                     .Sum(a => a.Debit - a.Credit);
 
             decimal totalLiabilities = accountBalances
-                                        .Where(a => a.GroupType == "Liability")
+                                        .Where(a => a.GroupType == "Liabilities")
                                         .Sum(a => a.Credit - a.Debit);
 
             decimal totalIncome = accountBalances
@@ -112,7 +112,7 @@ namespace Group19_iFINANCEAPP.Controllers
                                     .Sum(a => a.Credit - a.Debit);
 
             decimal totalExpenses = accountBalances
-                                    .Where(a => a.GroupType == "Expense")
+                                    .Where(a => a.GroupType == "Expenses")
                                     .Sum(a => a.Debit - a.Credit);
 
             decimal netProfitLoss = totalIncome - totalExpenses;
@@ -120,8 +120,8 @@ namespace Group19_iFINANCEAPP.Controllers
             // Step 3: Build Balance Sheet entries
             var result = new List<BalanceSheetEntry>
     {
-        new BalanceSheetEntry { Category = "Total Assets", Type = "Asset", Amount = totalAssets },
-        new BalanceSheetEntry { Category = "Total Liabilities", Type = "Liability", Amount = totalLiabilities },
+        new BalanceSheetEntry { Category = "Total Assets", Type = "Assets", Amount = totalAssets },
+        new BalanceSheetEntry { Category = "Total Liabilities", Type = "Liabilities", Amount = totalLiabilities },
         new BalanceSheetEntry { Category = "Net Profit/Loss", Type = "Income-Expense", Amount = netProfitLoss },
     };
 

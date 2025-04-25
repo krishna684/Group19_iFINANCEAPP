@@ -4,48 +4,49 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage Non-Admin Users
     public class NonAdminUsersController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // GET: NonAdminUsers
+        // Display all non-admin users
         public ActionResult Index()
         {
-            var nonAdminUser = db.NonAdminUser.Include(n => n.UserPassword);
-            return View(nonAdminUser.ToList());
+            var nonAdminUsers = db.NonAdminUser.Include(n => n.UserPassword);
+            return View(nonAdminUsers.ToList());
         }
 
-        // GET: NonAdminUsers/Details/5
+        // Show details of a specific non-admin user
         public ActionResult Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            NonAdminUser nonAdminUser = db.NonAdminUser.Find(id);
+
+            var nonAdminUser = db.NonAdminUser.Find(id);
+
             if (nonAdminUser == null)
             {
                 return HttpNotFound();
             }
+
             return View(nonAdminUser);
         }
 
-        // GET: NonAdminUsers/Create
+        // Show create new non-admin user page
         public ActionResult Create()
         {
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName");
             return View();
         }
 
-        // POST: NonAdminUsers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Handle creation of a new non-admin user (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Name,Address,Email")] NonAdminUser nonAdminUser)
@@ -61,25 +62,26 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(nonAdminUser);
         }
 
-        // GET: NonAdminUsers/Edit/5
+        // Show edit non-admin user page
         public ActionResult Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            NonAdminUser nonAdminUser = db.NonAdminUser.Find(id);
+
+            var nonAdminUser = db.NonAdminUser.Find(id);
+
             if (nonAdminUser == null)
             {
                 return HttpNotFound();
             }
+
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName", nonAdminUser.ID);
             return View(nonAdminUser);
         }
 
-        // POST: NonAdminUsers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Handle editing of a non-admin user (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,Address,Email")] NonAdminUser nonAdminUser)
@@ -90,42 +92,53 @@ namespace Group19_iFINANCEAPP.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName", nonAdminUser.ID);
             return View(nonAdminUser);
         }
 
-        // GET: NonAdminUsers/Delete/5
+        // Show delete confirmation for a non-admin user
         public ActionResult Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            NonAdminUser nonAdminUser = db.NonAdminUser.Find(id);
+
+            var nonAdminUser = db.NonAdminUser.Find(id);
+
             if (nonAdminUser == null)
             {
                 return HttpNotFound();
             }
+
             return View(nonAdminUser);
         }
 
-        // POST: NonAdminUsers/Delete/5
+        // Handle deletion of a non-admin user (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
-            NonAdminUser nonAdminUser = db.NonAdminUser.Find(id);
-            db.NonAdminUser.Remove(nonAdminUser);
-            db.SaveChanges();
+            var nonAdminUser = db.NonAdminUser.Find(id);
+
+            if (nonAdminUser != null)
+            {
+                db.NonAdminUser.Remove(nonAdminUser);
+                db.SaveChanges();
+            }
+
             return RedirectToAction("Index");
         }
 
+        // Dispose the database context
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 db.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }

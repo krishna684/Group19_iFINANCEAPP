@@ -9,94 +9,98 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage Account Groups (Create, Edit, Delete, View for non-admin users)
     public class AccountGroupsController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
+        // Check if the current user is an Admin
         private bool IsAdmin()
         {
             return Session["UserRole"]?.ToString() == "Admin";
         }
 
+        // Check if the user is logged in
         private bool IsLoggedIn()
         {
             return Session["UserID"] != null;
         }
 
+        // Check if the user is authorized to access the given group
         private bool IsAuthorized(AccountGroup group)
         {
             string userId = Session["UserID"]?.ToString();
             return group != null && group.UserID == userId;
         }
 
-        // GET: AccountGroups
+        // Display all account groups for the logged-in non-admin user
         public ActionResult Index()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            string userID = Session["UserID"].ToString();
+            string userId = Session["UserID"].ToString();
             var groups = db.AccountGroup.Include(a => a.AccountGroup2)
-                                        .Where(g => g.UserID == userID);
+                                        .Where(g => g.UserID == userId);
 
             return View(groups.ToList());
         }
 
-        // GET: AccountGroups/Details/5
+        // Display details of a specific account group
         public ActionResult Details(string id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            AccountGroup accountGroup = db.AccountGroup.Find(id);
-            if (accountGroup == null || !IsAuthorized(accountGroup)) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var accountGroup = db.AccountGroup.Find(id);
+            if (accountGroup == null || !IsAuthorized(accountGroup))
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
             return View(accountGroup);
         }
 
-        // GET: AccountGroups/Create
+        // Show the create account group form
         public ActionResult Create()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            string userID = Session["UserID"].ToString();
+            string userId = Session["UserID"].ToString();
             ViewBag.ParentGroupID = new SelectList(
-                db.AccountGroup.Where(g => g.UserID == userID), "ID", "Name"
+                db.AccountGroup.Where(g => g.UserID == userId), "ID", "Name"
             );
 
-            // 🔑 Auto-generate new group ID
-            string newID = GenerateUserScopedGroupID(userID);
+            string newID = GenerateUserScopedGroupID(userId);
             var model = new AccountGroup { ID = newID };
 
             return View(model);
         }
 
-        private string GenerateUserScopedGroupID(string userID)
+        // Generate a new group ID scoped to the current user
+        private string GenerateUserScopedGroupID(string userId)
         {
-            // Get latest group ID for this user
             var lastGroup = db.AccountGroup
-                              .Where(g => g.UserID == userID && g.ID.StartsWith(userID + "_GRP"))
+                              .Where(g => g.UserID == userId && g.ID.StartsWith(userId + "_GRP"))
                               .OrderByDescending(g => g.ID)
                               .FirstOrDefault();
 
             int nextNumber = 1;
 
-            if (lastGroup != null && lastGroup.ID.Length > userID.Length + 4)
+            if (lastGroup != null && lastGroup.ID.Length > userId.Length + 4)
             {
-                string numericPart = lastGroup.ID.Substring(userID.Length + 4); // After 'USR123_GRP'
+                string numericPart = lastGroup.ID.Substring(userId.Length + 4);
                 if (int.TryParse(numericPart, out int lastNumber))
                 {
                     nextNumber = lastNumber + 1;
                 }
             }
 
-            return $"{userID}_GRP{nextNumber:D4}";  // e.g., USR123_GRP0001
+            return $"{userId}_GRP{nextNumber:D4}";
         }
 
-
-        // POST: AccountGroups/Create
+        // Handle account group creation (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Name,ParentGroupID,ElementType")] AccountGroup accountGroup)
@@ -112,32 +116,33 @@ namespace Group19_iFINANCEAPP.Controllers
                 return RedirectToAction("Index");
             }
 
-            string userID = Session["UserID"].ToString();
+            string userId = Session["UserID"].ToString();
             ViewBag.ParentGroupID = new SelectList(
-                db.AccountGroup.Where(g => g.UserID == userID), "ID", "Name", accountGroup.ParentGroupID
+                db.AccountGroup.Where(g => g.UserID == userId), "ID", "Name", accountGroup.ParentGroupID
             );
             return View(accountGroup);
         }
 
-        // GET: AccountGroups/Edit/5
+        // Show the edit account group form
         public ActionResult Edit(string id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            AccountGroup accountGroup = db.AccountGroup.Find(id);
-            if (accountGroup == null || !IsAuthorized(accountGroup)) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            var accountGroup = db.AccountGroup.Find(id);
+            if (accountGroup == null || !IsAuthorized(accountGroup))
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            string userID = Session["UserID"].ToString();
+            string userId = Session["UserID"].ToString();
             ViewBag.ParentGroupID = new SelectList(
-                db.AccountGroup.Where(g => g.UserID == userID), "ID", "Name", accountGroup.ParentGroupID
+                db.AccountGroup.Where(g => g.UserID == userId), "ID", "Name", accountGroup.ParentGroupID
             );
             return View(accountGroup);
         }
 
-        // POST: AccountGroups/Edit/5
+        // Handle account group editing (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,ParentGroupID,ElementType")] AccountGroup accountGroup)
@@ -147,34 +152,35 @@ namespace Group19_iFINANCEAPP.Controllers
 
             if (ModelState.IsValid)
             {
-                accountGroup.UserID = Session["UserID"].ToString(); // Maintain ownership
+                accountGroup.UserID = Session["UserID"].ToString();
                 db.Entry(accountGroup).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            string userID = Session["UserID"].ToString();
+            string userId = Session["UserID"].ToString();
             ViewBag.ParentGroupID = new SelectList(
-                db.AccountGroup.Where(g => g.UserID == userID), "ID", "Name", accountGroup.ParentGroupID
+                db.AccountGroup.Where(g => g.UserID == userId), "ID", "Name", accountGroup.ParentGroupID
             );
             return View(accountGroup);
         }
 
-        // GET: AccountGroups/Delete/5
+        // Show the delete confirmation page
         public ActionResult Delete(string id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
             if (IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            AccountGroup accountGroup = db.AccountGroup.Find(id);
-            if (accountGroup == null || !IsAuthorized(accountGroup)) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            var accountGroup = db.AccountGroup.Find(id);
+            if (accountGroup == null || !IsAuthorized(accountGroup))
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
             return View(accountGroup);
         }
 
-        // POST: AccountGroups/Delete/5
+        // Handle account group deletion (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
@@ -184,7 +190,6 @@ namespace Group19_iFINANCEAPP.Controllers
 
             var accountGroup = db.AccountGroup.Find(id);
 
-            // 🔒 Check for sub-groups
             if (db.AccountGroup.Any(g => g.ParentGroupID == id))
             {
                 TempData["DeleteError"] = "⚠️ Cannot delete this group because it has linked sub-groups. Please delete or reassign those first.";
@@ -200,6 +205,7 @@ namespace Group19_iFINANCEAPP.Controllers
             return RedirectToAction("Index");
         }
 
+        // Dispose database context
         protected override void Dispose(bool disposing)
         {
             if (disposing)

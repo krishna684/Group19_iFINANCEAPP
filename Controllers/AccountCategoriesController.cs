@@ -10,40 +10,53 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    /// <summary>
+    /// Controller for managing Account Categories (Assets, Liabilities, Income, Expenses)
+    /// </summary>
     public class AccountCategoriesController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // GET: AccountCategories
+        /// <summary>
+        /// Displays a list of all account categories.
+        /// </summary>
         public ActionResult Index()
         {
-            return View(db.AccountCategory.ToList());
+            var categories = db.AccountCategory.ToList();
+            return View(categories);
         }
 
-        // GET: AccountCategories/Details/5
+        /// <summary>
+        /// Displays the details of a specific account category.
+        /// </summary>
         public ActionResult Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AccountCategory accountCategory = db.AccountCategory.Find(id);
+
+            var accountCategory = db.AccountCategory.Find(id);
+
             if (accountCategory == null)
             {
                 return HttpNotFound();
             }
+
             return View(accountCategory);
         }
 
-        // GET: AccountCategories/Create
+        /// <summary>
+        /// Displays the form to create a new account category.
+        /// </summary>
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: AccountCategories/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Creates a new account category and saves it to the database.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Name,Type")] AccountCategory accountCategory)
@@ -52,30 +65,35 @@ namespace Group19_iFINANCEAPP.Controllers
             {
                 db.AccountCategory.Add(accountCategory);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             return View(accountCategory);
         }
 
-        // GET: AccountCategories/Edit/5
+        /// <summary>
+        /// Displays the form to edit an existing account category.
+        /// </summary>
         public ActionResult Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AccountCategory accountCategory = db.AccountCategory.Find(id);
+
+            var accountCategory = db.AccountCategory.Find(id);
+
             if (accountCategory == null)
             {
                 return HttpNotFound();
             }
+
             return View(accountCategory);
         }
 
-        // POST: AccountCategories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Updates an existing account category.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,Type")] AccountCategory accountCategory)
@@ -84,43 +102,60 @@ namespace Group19_iFINANCEAPP.Controllers
             {
                 db.Entry(accountCategory).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
+
             return View(accountCategory);
         }
 
-        // GET: AccountCategories/Delete/5
+        /// <summary>
+        /// Displays the confirmation page for deleting an account category.
+        /// </summary>
         public ActionResult Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AccountCategory accountCategory = db.AccountCategory.Find(id);
+
+            var accountCategory = db.AccountCategory.Find(id);
+
             if (accountCategory == null)
             {
                 return HttpNotFound();
             }
+
             return View(accountCategory);
         }
 
-        // POST: AccountCategories/Delete/5
+        /// <summary>
+        /// Deletes an account category from the database.
+        /// </summary>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
-            AccountCategory accountCategory = db.AccountCategory.Find(id);
-            db.AccountCategory.Remove(accountCategory);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            var accountCategory = db.AccountCategory.Find(id);
+
+            if (accountCategory != null)
+            {
+                db.AccountCategory.Remove(accountCategory);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Disposes the database context to free resources.
+        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 db.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }

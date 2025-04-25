@@ -83,7 +83,7 @@
                     (SelectList)ViewBag.GroupID,
                     "Select Group", new
                          {
-                        @class = "form-control",
+                        @class = "form-select",
                         title = "Select the group this account belongs to."
                     })
                 @Html.ValidationMessageFor(model => model.GroupID, "", new { @class = "text-danger" })

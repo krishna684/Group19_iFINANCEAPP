@@ -5,28 +5,41 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller for admin to register new users
     public class ManageUserController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // GET: ManageUser/Register
+        // Show the register new user page
         public ActionResult Register()
         {
             if (Session["UserRole"]?.ToString() != "Admin")
+            {
                 return RedirectToAction("Login", "Auth");
+            }
 
             return View();
         }
 
-        // POST: ManageUser/Register
+        // Handle registration of a new user (POST)
         [HttpPost]
-        public ActionResult Register(string ID, string UserName, string Password, string Role,
-                                     string Name, string Address, string Email,
-                                     string SecurityQuestion, string SecurityAnswer,
-                                     DateTime? DateHired, DateTime? DateFinished)
+        public ActionResult Register(
+            string ID,
+            string UserName,
+            string Password,
+            string Role,
+            string Name,
+            string Address,
+            string Email,
+            string SecurityQuestion,
+            string SecurityAnswer,
+            DateTime? DateHired,
+            DateTime? DateFinished)
         {
             if (Session["UserRole"]?.ToString() != "Admin")
+            {
                 return RedirectToAction("Login", "Auth");
+            }
 
             if (db.UserPassword.Any(u => u.ID == ID || u.UserName == UserName))
             {
@@ -34,19 +47,19 @@ namespace Group19_iFINANCEAPP.Controllers
                 return View();
             }
 
-            // 1. Add to UserPassword
+            // Add user credentials to UserPassword table
             db.UserPassword.Add(new UserPassword
             {
                 ID = ID,
                 UserName = UserName,
-                EncryptedPassword = Password, // TODO: Add hash later
+                EncryptedPassword = Password, // Note: Should hash password later
                 PasswordExpiryTime = 90,
                 UserAccountExpiryDate = new DateTime(2026, 1, 1),
                 SecurityQuestion = SecurityQuestion,
                 SecurityAnswer = SecurityAnswer
             });
 
-            // 2. Add to either Admin or NonAdmin
+            // Assign role-specific data
             if (Role == "Admin")
             {
                 db.Administrator.Add(new Administrator
@@ -69,6 +82,7 @@ namespace Group19_iFINANCEAPP.Controllers
             }
 
             db.SaveChanges();
+
             ViewBag.Message = "User created successfully.";
             return View();
         }

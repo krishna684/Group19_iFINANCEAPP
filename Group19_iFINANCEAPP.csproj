@@ -144,7 +144,6 @@
     <Compile Include="Controllers\MasterAccountsController.cs" />
     <Compile Include="Controllers\NonAdminUsersController.cs" />
     <Compile Include="Controllers\TransactionHeadersController.cs" />
-    <Compile Include="Controllers\TransactionLinesController.cs" />
     <Compile Include="Controllers\UserPasswordsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

@@ -2,14 +2,14 @@
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller for handling home page redirects based on user roles
     public class HomeController : Controller
     {
-        // Main entry point – redirect based on role or to login if not authenticated
+        // Main page – redirect to appropriate home based on user role
         public ActionResult Index()
         {
             if (Session["UserID"] == null || Session["UserRole"] == null)
             {
-                // User is not logged in → redirect to Login page
                 return RedirectToAction("Login", "Auth");
             }
 
@@ -23,16 +23,17 @@ namespace Group19_iFINANCEAPP.Controllers
                 return View("UserHome");
             }
 
-            // Default fallback
             return RedirectToAction("Login", "Auth");
         }
 
+        // Show About page
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
             return View();
         }
 
+        // Show Contact page
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";

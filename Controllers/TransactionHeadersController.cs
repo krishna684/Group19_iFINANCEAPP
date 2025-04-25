@@ -8,14 +8,21 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage double-entry transactions
     public class TransactionHeadersController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
+        // Check if user is logged in
         private bool IsLoggedIn() => Session["UserID"] != null;
+
+        // Check if user is admin
         private bool IsAdmin() => Session["UserRole"]?.ToString() == "Admin";
+
+        // Get current user ID
         private string CurrentUserID() => Session["UserID"].ToString();
 
+        // Generate a new transaction ID for the user
         private string GenerateTransactionID(string userID)
         {
             var last = db.TransactionHeader
@@ -24,14 +31,17 @@ namespace Group19_iFINANCEAPP.Controllers
                          .FirstOrDefault();
 
             int next = 1;
+
             if (last != null && last.ID.Length > userID.Length + 4)
             {
                 string numPart = last.ID.Substring(userID.Length + 4);
                 if (int.TryParse(numPart, out int lastNum)) next = lastNum + 1;
             }
+
             return $"{userID}_TRX{next:D4}";
         }
 
+        // Display all transaction headers for the user
         public ActionResult Index()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
@@ -45,23 +55,26 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(transactions);
         }
 
+        // Show transaction details
         public ActionResult Details(string id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            string userID = CurrentUserID(); // ✅ cache it first
+            string userID = CurrentUserID();
             var header = db.TransactionHeader
                            .Include(t => t.TransactionLine)
                            .FirstOrDefault(t => t.ID == id);
 
             if (header == null || header.NonAdminUserID != userID)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
 
             return View(header);
         }
 
-
+        // Show create transaction page
         public ActionResult Create()
         {
             if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
@@ -82,11 +95,13 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(header);
         }
 
+        // Handle creating a new transaction (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(TransactionHeader header, List<TransactionLine> Lines)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+
             string userID = CurrentUserID();
 
             if (Lines == null || Lines.Count < 2)
@@ -102,7 +117,7 @@ namespace Group19_iFINANCEAPP.Controllers
 
                 if (!valid)
                 {
-                    ModelState.AddModelError("", "❌ Each line must have either a debit or a credit, not both.");
+                    ModelState.AddModelError("", "❌ Each line must have either debit or credit — not both or none.");
                     allLinesValid = false;
                     break;
                 }
@@ -142,13 +157,18 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(header);
         }
 
+        // Show edit transaction page
         public ActionResult Edit(string id)
         {
             if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var header = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
-            if (header == null || header.NonAdminUserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
+            if (header == null || header.NonAdminUserID != CurrentUserID())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
 
             string userID = CurrentUserID();
             ViewBag.MasterAccounts = db.MasterAccount
@@ -159,12 +179,14 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(header);
         }
 
+        // Handle editing an existing transaction (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(TransactionHeader header, List<TransactionLine> Lines)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
-            string userID = Session["UserID"].ToString();
+
+            string userID = CurrentUserID();
 
             if (Lines == null || Lines.Count < 2)
                 ModelState.AddModelError("", "❌ At least two transaction lines are required.");
@@ -179,7 +201,7 @@ namespace Group19_iFINANCEAPP.Controllers
 
                 if (!validLine)
                 {
-                    ModelState.AddModelError("", "❌ Each line must have either debit or credit — not both or none.");
+                    ModelState.AddModelError("", "❌ Each line must have either debit or credit — not both.");
                     allLinesValid = false;
                     break;
                 }
@@ -199,12 +221,14 @@ namespace Group19_iFINANCEAPP.Controllers
                 header.NonAdminUserID = userID;
                 db.Entry(header).State = EntityState.Modified;
 
-                // Delete existing lines
                 var oldLines = db.TransactionLine.Where(t => t.TransactionID == header.ID).ToList();
-                foreach (var old in oldLines) db.TransactionLine.Remove(old);
+                foreach (var old in oldLines)
+                {
+                    db.TransactionLine.Remove(old);
+                }
+
                 db.SaveChanges();
 
-                // Add new lines
                 foreach (var line in Lines)
                 {
                     line.ID = Guid.NewGuid().ToString();
@@ -216,7 +240,6 @@ namespace Group19_iFINANCEAPP.Controllers
                 return RedirectToAction("Index");
             }
 
-            // ✅ Preserve user's lines on error
             header.TransactionLine = Lines;
 
             ViewBag.MasterAccounts = db.MasterAccount
@@ -227,34 +250,35 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(header);
         }
 
+        // Show delete confirmation page
         public ActionResult Delete(string id)
         {
             if (!IsLoggedIn() || IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var header = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
-            if (header == null || header.NonAdminUserID != CurrentUserID()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
+            if (header == null || header.NonAdminUserID != CurrentUserID())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
 
             return View(header);
         }
 
+        // Handle deleting a transaction (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Auth");
+
             string userID = CurrentUserID();
 
             var transaction = db.TransactionHeader.Include(t => t.TransactionLine).FirstOrDefault(t => t.ID == id);
+
             if (transaction == null || transaction.NonAdminUserID != userID)
                 return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-
-            bool isLocked = false;
-            if (isLocked)
-            {
-                TempData["DeleteError"] = "❌ This transaction is locked and cannot be deleted.";
-                return RedirectToAction("Delete", new { id = id });
-            }
 
             foreach (var line in transaction.TransactionLine.ToList())
             {
@@ -263,12 +287,18 @@ namespace Group19_iFINANCEAPP.Controllers
 
             db.TransactionHeader.Remove(transaction);
             db.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
+        // Dispose the database context
         protected override void Dispose(bool disposing)
         {
-            if (disposing) db.Dispose();
+            if (disposing)
+            {
+                db.Dispose();
+            }
+
             base.Dispose(disposing);
         }
     }

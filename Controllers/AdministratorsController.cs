@@ -10,42 +10,43 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage Administrator information
     public class AdministratorsController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // GET: Administrators
+        // Display the list of administrators
         public ActionResult Index()
         {
-            var administrator = db.Administrator.Include(a => a.UserPassword);
-            return View(administrator.ToList());
+            var administrators = db.Administrator.Include(a => a.UserPassword);
+            return View(administrators.ToList());
         }
 
-        // GET: Administrators/Details/5
+        // Display the details of a specific administrator
         public ActionResult Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Administrator administrator = db.Administrator.Find(id);
+
+            var administrator = db.Administrator.Find(id);
             if (administrator == null)
             {
                 return HttpNotFound();
             }
+
             return View(administrator);
         }
 
-        // GET: Administrators/Create
+        // Show the form to create a new administrator
         public ActionResult Create()
         {
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName");
             return View();
         }
 
-        // POST: Administrators/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Handle the creation of a new administrator (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Name,DateHired,DateFinished")] Administrator administrator)
@@ -61,25 +62,25 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(administrator);
         }
 
-        // GET: Administrators/Edit/5
+        // Show the form to edit an existing administrator
         public ActionResult Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Administrator administrator = db.Administrator.Find(id);
+
+            var administrator = db.Administrator.Find(id);
             if (administrator == null)
             {
                 return HttpNotFound();
             }
+
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName", administrator.ID);
             return View(administrator);
         }
 
-        // POST: Administrators/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Handle the editing of an administrator (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Name,DateHired,DateFinished")] Administrator administrator)
@@ -90,42 +91,52 @@ namespace Group19_iFINANCEAPP.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             ViewBag.ID = new SelectList(db.UserPassword, "ID", "UserName", administrator.ID);
             return View(administrator);
         }
 
-        // GET: Administrators/Delete/5
+        // Show the delete confirmation page for an administrator
         public ActionResult Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Administrator administrator = db.Administrator.Find(id);
+
+            var administrator = db.Administrator.Find(id);
             if (administrator == null)
             {
                 return HttpNotFound();
             }
+
             return View(administrator);
         }
 
-        // POST: Administrators/Delete/5
+        // Handle the deletion of an administrator (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
-            Administrator administrator = db.Administrator.Find(id);
-            db.Administrator.Remove(administrator);
-            db.SaveChanges();
+            var administrator = db.Administrator.Find(id);
+
+            if (administrator != null)
+            {
+                db.Administrator.Remove(administrator);
+                db.SaveChanges();
+            }
+
             return RedirectToAction("Index");
         }
 
+        // Dispose the database context when the controller is disposed
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 db.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }

@@ -97,6 +97,44 @@
 
 @section Scripts {
     <script>
+        // ✅ Bootstrap validation script
+        (function () {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+
+            Array.from(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })();
+
+        // ✅ Role-based admin fields toggle
+        document.getElementById("roleSelector").addEventListener("change", function () {
+            const adminFields = document.querySelector(".admin-only");
+            if (this.value === "Admin") {
+                adminFields.style.display = "flex";
+                adminFields.style.flexWrap = "wrap";
+                adminFields.querySelectorAll('input').forEach(input => input.required = true);
+            } else {
+                adminFields.style.display = "none";
+                adminFields.querySelectorAll('input').forEach(input => input.required = false);
+            }
+        });
+
+        // ✅ Password show/hide toggle
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const pwdField = document.getElementById("passwordInput");
+            const type = pwdField.type === "password" ? "text" : "password";
+            pwdField.type = type;
+            this.textContent = type === "password" ? "Show" : "Hide";
+        });
+
+
         // Role-based admin fields toggle
         document.getElementById("roleSelector").addEventListener("change", function () {
             const adminFields = document.querySelector(".admin-only");

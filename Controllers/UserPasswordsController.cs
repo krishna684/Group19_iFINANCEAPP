@@ -4,47 +4,48 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage User Passwords (Admin Only)
     public class UserPasswordsController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
-        // Admin-only guard
+        // Check if current user is admin
         private bool IsAdmin()
         {
             return Session["UserRole"] != null && Session["UserRole"].ToString() == "Admin";
         }
 
-        // GET: UserPasswords
+        // Display all user passwords
         public ActionResult Index()
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            var userPassword = db.UserPassword.Include(u => u.Administrator).Include(u => u.NonAdminUser);
-            return View(userPassword.ToList());
+            var userPasswords = db.UserPassword.Include(u => u.Administrator).Include(u => u.NonAdminUser);
+            return View(userPasswords.ToList());
         }
 
-        // GET: UserPasswords/Details/5
+        // Show details of a specific user password
         public ActionResult Details(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            if (id == null)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            var userPassword = db.UserPassword.Find(id);
 
-            UserPassword userPassword = db.UserPassword.Find(id);
             if (userPassword == null)
+            {
                 return HttpNotFound();
+            }
 
             return View(userPassword);
         }
 
-        // GET: UserPasswords/Create
+        // Show create new user password page
         public ActionResult Create()
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
@@ -54,7 +55,7 @@ namespace Group19_iFINANCEAPP.Controllers
             return View();
         }
 
-        // POST: UserPasswords/Create
+        // Handle creating a new user password (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,UserName,EncryptedPassword,PasswordExpiryTime,UserAccountExpiryDate")] UserPassword userPassword)
@@ -73,24 +74,25 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(userPassword);
         }
 
-        // GET: UserPasswords/Edit/5
+        // Show edit user password page
         public ActionResult Edit(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            if (id == null)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            var userPassword = db.UserPassword.Find(id);
 
-            UserPassword userPassword = db.UserPassword.Find(id);
             if (userPassword == null)
+            {
                 return HttpNotFound();
+            }
 
             ViewBag.AdminUsers = new SelectList(db.Administrator, "ID", "Name", userPassword.ID);
             ViewBag.NonAdminUsers = new SelectList(db.NonAdminUser, "ID", "Name", userPassword.ID);
             return View(userPassword);
         }
 
-        // POST: UserPasswords/Edit/5
+        // Handle editing a user password (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,UserName,EncryptedPassword,PasswordExpiryTime,UserAccountExpiryDate")] UserPassword userPassword)
@@ -109,40 +111,48 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(userPassword);
         }
 
-        // GET: UserPasswords/Delete/5
+        // Show delete confirmation page
         public ActionResult Delete(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            if (id == null)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            var userPassword = db.UserPassword.Find(id);
 
-            UserPassword userPassword = db.UserPassword.Find(id);
             if (userPassword == null)
+            {
                 return HttpNotFound();
+            }
 
             return View(userPassword);
         }
 
-        // POST: UserPasswords/Delete/5
+        // Handle deleting a user password (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
 
-            UserPassword userPassword = db.UserPassword.Find(id);
-            db.UserPassword.Remove(userPassword);
-            db.SaveChanges();
+            var userPassword = db.UserPassword.Find(id);
+
+            if (userPassword != null)
+            {
+                db.UserPassword.Remove(userPassword);
+                db.SaveChanges();
+            }
+
             return RedirectToAction("Index");
         }
 
+        // Dispose the database context
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 db.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }

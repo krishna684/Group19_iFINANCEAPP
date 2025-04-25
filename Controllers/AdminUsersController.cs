@@ -8,16 +8,18 @@ using Group19_iFINANCEAPP.Models;
 
 namespace Group19_iFINANCEAPP.Controllers
 {
+    // Controller to manage Users (Admin view only)
     public class AdminUsersController : Controller
     {
         private Group19_iFINANCEDBEntities db = new Group19_iFINANCEDBEntities();
 
+        // Check if the current user is an Admin
         private bool IsAdmin()
         {
             return Session["UserRole"]?.ToString() == "Admin";
         }
 
-        // GET: AdminUsers
+        // Display the list of all users with optional search filter
         public ActionResult Index(string searchString)
         {
             if (Session["UserID"] == null || !IsAdmin())
@@ -29,7 +31,7 @@ namespace Group19_iFINANCEAPP.Controllers
 
             var users = db.UserPassword.AsQueryable();
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 users = users.Where(u => u.UserName.Contains(searchString));
             }
@@ -37,7 +39,7 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(users.ToList());
         }
 
-        // GET: AdminUsers/Search (AJAX)
+        // AJAX: Search users dynamically
         public ActionResult Search(string searchString)
         {
             if (Session["UserID"] == null || !IsAdmin())
@@ -47,7 +49,7 @@ namespace Group19_iFINANCEAPP.Controllers
 
             var users = db.UserPassword.AsQueryable();
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 users = users.Where(u => u.UserName.Contains(searchString));
             }
@@ -55,11 +57,11 @@ namespace Group19_iFINANCEAPP.Controllers
             return PartialView("_UserTable", users.ToList());
         }
 
-        // GET: AdminUsers/Details/5
+        // Display user details
         public ActionResult Details(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword
                          .Include(u => u.Administrator)
@@ -71,11 +73,11 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(user);
         }
 
-        // GET: AdminUsers/Edit/5
+        // Show the form to edit a user
         public ActionResult Edit(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword
                          .Include(u => u.Administrator)
@@ -87,7 +89,7 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(user);
         }
 
-        // POST: AdminUsers/Edit/5
+        // Handle editing of a user (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,UserName,EncryptedPassword,PasswordExpiryTime,UserAccountExpiryDate")] UserPassword user)
@@ -117,11 +119,11 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(user);
         }
 
-        // GET: AdminUsers/Delete/5
+        // Show the delete confirmation page for a user
         public ActionResult Delete(string id)
         {
             if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
-            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (string.IsNullOrEmpty(id)) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var user = db.UserPassword.Find(id);
             if (user == null) return HttpNotFound();
@@ -129,20 +131,30 @@ namespace Group19_iFINANCEAPP.Controllers
             return View(user);
         }
 
-        // POST: AdminUsers/Delete/5
+        // Handle deletion of a user (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(string id)
         {
+            if (!IsAdmin()) return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+
             var user = db.UserPassword.Find(id);
-            if (!IsAdmin() || user == null)
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
 
             var admin = db.Administrator.Find(id);
-            if (admin != null) db.Administrator.Remove(admin);
+            if (admin != null)
+            {
+                db.Administrator.Remove(admin);
+            }
 
             var nonAdmin = db.NonAdminUser.Find(id);
-            if (nonAdmin != null) db.NonAdminUser.Remove(nonAdmin);
+            if (nonAdmin != null)
+            {
+                db.NonAdminUser.Remove(nonAdmin);
+            }
 
             db.UserPassword.Remove(user);
             db.SaveChanges();
